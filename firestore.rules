@@ -1,0 +1,23 @@
+rules_version = '2';
+
+// WellTrack AI: every document lives under users/{uid} and is private to that signed-in user.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+
+      match /backup/{part} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+
+    // Everything else is closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

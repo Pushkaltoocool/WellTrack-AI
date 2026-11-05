@@ -1,0 +1,808 @@
+{
+  "models": {
+    "KNN": {
+      "bestParams": {
+        "clf__n_neighbors": 15,
+        "clf__weights": "distance"
+      },
+      "cvMacroF1": 0.8786,
+      "testAccuracy": 0.8843,
+      "testMacroF1": 0.8826,
+      "testMacroPrecision": 0.8944,
+      "testMacroRecall": 0.8803,
+      "perClass": {
+        "WALKING": {
+          "precision": 0.7956,
+          "recall": 0.9577,
+          "f1": 0.8692,
+          "support": 496
+        },
+        "WALKING_UPSTAIRS": {
+          "precision": 0.9198,
+          "recall": 0.828,
+          "f1": 0.8715,
+          "support": 471
+        },
+        "WALKING_DOWNSTAIRS": {
+          "precision": 0.9592,
+          "recall": 0.8405,
+          "f1": 0.8959,
+          "support": 420
+        },
+        "SITTING": {
+          "precision": 0.9018,
+          "recall": 0.7291,
+          "f1": 0.8063,
+          "support": 491
+        },
+        "STANDING": {
+          "precision": 0.7901,
+          "recall": 0.9267,
+          "f1": 0.8529,
+          "support": 532
+        },
+        "LAYING": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 537
+        }
+      },
+      "confusionMatrix": [
+        [
+          475,
+          12,
+          9,
+          0,
+          0,
+          0
+        ],
+        [
+          75,
+          390,
+          6,
+          0,
+          0,
+          0
+        ],
+        [
+          47,
+          20,
+          353,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          2,
+          0,
+          358,
+          131,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          39,
+          493,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          537
+        ]
+      ],
+      "trainSeconds": 12.6
+    },
+    "SVM (RBF)": {
+      "bestParams": {
+        "clf__C": 100,
+        "clf__gamma": "scale"
+      },
+      "cvMacroF1": 0.9167,
+      "testAccuracy": 0.9372,
+      "testMacroF1": 0.937,
+      "testMacroPrecision": 0.9387,
+      "testMacroRecall": 0.9369,
+      "perClass": {
+        "WALKING": {
+          "precision": 0.9208,
+          "recall": 0.9375,
+          "f1": 0.9291,
+          "support": 496
+        },
+        "WALKING_UPSTAIRS": {
+          "precision": 0.9557,
+          "recall": 0.9151,
+          "f1": 0.9349,
+          "support": 471
+        },
+        "WALKING_DOWNSTAIRS": {
+          "precision": 0.9469,
+          "recall": 0.9762,
+          "f1": 0.9613,
+          "support": 420
+        },
+        "SITTING": {
+          "precision": 0.9368,
+          "recall": 0.8452,
+          "f1": 0.8887,
+          "support": 491
+        },
+        "STANDING": {
+          "precision": 0.872,
+          "recall": 0.9474,
+          "f1": 0.9081,
+          "support": 532
+        },
+        "LAYING": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 537
+        }
+      },
+      "confusionMatrix": [
+        [
+          465,
+          13,
+          18,
+          0,
+          0,
+          0
+        ],
+        [
+          35,
+          431,
+          5,
+          0,
+          0,
+          0
+        ],
+        [
+          5,
+          5,
+          410,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          2,
+          0,
+          415,
+          74,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          28,
+          504,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          537
+        ]
+      ],
+      "trainSeconds": 7.8
+    },
+    "Decision Tree": {
+      "bestParams": {
+        "max_depth": 10,
+        "min_samples_leaf": 5
+      },
+      "cvMacroF1": 0.8434,
+      "testAccuracy": 0.8395,
+      "testMacroF1": 0.8355,
+      "testMacroPrecision": 0.8384,
+      "testMacroRecall": 0.8346,
+      "perClass": {
+        "WALKING": {
+          "precision": 0.7964,
+          "recall": 0.8044,
+          "f1": 0.8004,
+          "support": 496
+        },
+        "WALKING_UPSTAIRS": {
+          "precision": 0.7466,
+          "recall": 0.8259,
+          "f1": 0.7843,
+          "support": 471
+        },
+        "WALKING_DOWNSTAIRS": {
+          "precision": 0.8438,
+          "recall": 0.7333,
+          "f1": 0.7847,
+          "support": 420
+        },
+        "SITTING": {
+          "precision": 0.8109,
+          "recall": 0.8208,
+          "f1": 0.8158,
+          "support": 491
+        },
+        "STANDING": {
+          "precision": 0.8327,
+          "recall": 0.8233,
+          "f1": 0.828,
+          "support": 532
+        },
+        "LAYING": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 537
+        }
+      },
+      "confusionMatrix": [
+        [
+          399,
+          53,
+          44,
+          0,
+          0,
+          0
+        ],
+        [
+          69,
+          389,
+          13,
+          0,
+          0,
+          0
+        ],
+        [
+          33,
+          79,
+          308,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          403,
+          88,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          94,
+          438,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          537
+        ]
+      ],
+      "trainSeconds": 11.7
+    },
+    "Random Forest": {
+      "bestParams": {
+        "max_depth": null,
+        "max_features": "sqrt",
+        "min_samples_leaf": 1,
+        "n_estimators": 100
+      },
+      "cvMacroF1": 0.8987,
+      "testAccuracy": 0.8931,
+      "testMacroF1": 0.8916,
+      "testMacroPrecision": 0.8951,
+      "testMacroRecall": 0.8901,
+      "perClass": {
+        "WALKING": {
+          "precision": 0.8693,
+          "recall": 0.8851,
+          "f1": 0.8771,
+          "support": 496
+        },
+        "WALKING_UPSTAIRS": {
+          "precision": 0.8207,
+          "recall": 0.8747,
+          "f1": 0.8469,
+          "support": 471
+        },
+        "WALKING_DOWNSTAIRS": {
+          "precision": 0.9421,
+          "recall": 0.8524,
+          "f1": 0.895,
+          "support": 420
+        },
+        "SITTING": {
+          "precision": 0.8951,
+          "recall": 0.8167,
+          "f1": 0.8541,
+          "support": 491
+        },
+        "STANDING": {
+          "precision": 0.8435,
+          "recall": 0.9117,
+          "f1": 0.8762,
+          "support": 532
+        },
+        "LAYING": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 537
+        }
+      },
+      "confusionMatrix": [
+        [
+          439,
+          40,
+          17,
+          0,
+          0,
+          0
+        ],
+        [
+          54,
+          412,
+          5,
+          0,
+          0,
+          0
+        ],
+        [
+          12,
+          50,
+          358,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          401,
+          90,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          47,
+          485,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          537
+        ]
+      ],
+      "trainSeconds": 36.3
+    },
+    "Logistic Regression": {
+      "bestParams": {
+        "clf__C": 10
+      },
+      "cvMacroF1": 0.9021,
+      "testAccuracy": 0.9226,
+      "testMacroF1": 0.9224,
+      "testMacroPrecision": 0.9262,
+      "testMacroRecall": 0.9218,
+      "perClass": {
+        "WALKING": {
+          "precision": 0.8836,
+          "recall": 0.9798,
+          "f1": 0.9293,
+          "support": 496
+        },
+        "WALKING_UPSTAIRS": {
+          "precision": 0.9394,
+          "recall": 0.8556,
+          "f1": 0.8956,
+          "support": 471
+        },
+        "WALKING_DOWNSTAIRS": {
+          "precision": 0.957,
+          "recall": 0.9548,
+          "f1": 0.9559,
+          "support": 420
+        },
+        "SITTING": {
+          "precision": 0.9268,
+          "recall": 0.8248,
+          "f1": 0.8728,
+          "support": 491
+        },
+        "STANDING": {
+          "precision": 0.8501,
+          "recall": 0.938,
+          "f1": 0.8919,
+          "support": 532
+        },
+        "LAYING": {
+          "precision": 1.0,
+          "recall": 0.9777,
+          "f1": 0.9887,
+          "support": 537
+        }
+      },
+      "confusionMatrix": [
+        [
+          486,
+          0,
+          10,
+          0,
+          0,
+          0
+        ],
+        [
+          57,
+          403,
+          8,
+          0,
+          3,
+          0
+        ],
+        [
+          6,
+          13,
+          401,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          405,
+          85,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          32,
+          499,
+          0
+        ],
+        [
+          0,
+          12,
+          0,
+          0,
+          0,
+          525
+        ]
+      ],
+      "trainSeconds": 3.5
+    }
+  },
+  "deployed": {
+    "accuracy": 0.9216,
+    "macroF1": 0.9213,
+    "macroPrecision": 0.9255,
+    "macroRecall": 0.9208,
+    "expectedCalibrationError": 0.0368,
+    "reliability": [
+      {
+        "bin": [
+          0.4,
+          0.5
+        ],
+        "count": 9,
+        "meanConfidence": 0.4634,
+        "accuracy": 0.5556
+      },
+      {
+        "bin": [
+          0.5,
+          0.6
+        ],
+        "count": 76,
+        "meanConfidence": 0.5527,
+        "accuracy": 0.4079
+      },
+      {
+        "bin": [
+          0.6,
+          0.7
+        ],
+        "count": 68,
+        "meanConfidence": 0.6491,
+        "accuracy": 0.5882
+      },
+      {
+        "bin": [
+          0.7,
+          0.8
+        ],
+        "count": 80,
+        "meanConfidence": 0.756,
+        "accuracy": 0.6875
+      },
+      {
+        "bin": [
+          0.8,
+          0.9
+        ],
+        "count": 143,
+        "meanConfidence": 0.8538,
+        "accuracy": 0.7483
+      },
+      {
+        "bin": [
+          0.9,
+          1.0
+        ],
+        "count": 2571,
+        "meanConfidence": 0.9918,
+        "accuracy": 0.9638
+      }
+    ],
+    "perClass": {
+      "WALKING": {
+        "precision": 0.8788,
+        "recall": 0.9798,
+        "f1": 0.9266,
+        "support": 496
+      },
+      "WALKING_UPSTAIRS": {
+        "precision": 0.9412,
+        "recall": 0.8493,
+        "f1": 0.8929,
+        "support": 471
+      },
+      "WALKING_DOWNSTAIRS": {
+        "precision": 0.9571,
+        "recall": 0.9571,
+        "f1": 0.9571,
+        "support": 420
+      },
+      "SITTING": {
+        "precision": 0.9286,
+        "recall": 0.8208,
+        "f1": 0.8714,
+        "support": 491
+      },
+      "STANDING": {
+        "precision": 0.8475,
+        "recall": 0.9398,
+        "f1": 0.8913,
+        "support": 532
+      },
+      "LAYING": {
+        "precision": 1.0,
+        "recall": 0.9777,
+        "f1": 0.9887,
+        "support": 537
+      }
+    },
+    "confusionMatrix": [
+      [
+        486,
+        0,
+        10,
+        0,
+        0,
+        0
+      ],
+      [
+        60,
+        400,
+        8,
+        0,
+        3,
+        0
+      ],
+      [
+        6,
+        12,
+        402,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        403,
+        87,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        31,
+        500,
+        0
+      ],
+      [
+        0,
+        12,
+        0,
+        0,
+        0,
+        525
+      ]
+    ]
+  },
+  "featureCount": 82,
+  "deployedAccOnly": {
+    "accuracy": 0.866,
+    "macroF1": 0.8655,
+    "macroPrecision": 0.8678,
+    "macroRecall": 0.8658,
+    "expectedCalibrationError": 0.0611,
+    "reliability": [
+      {
+        "bin": [
+          0.4,
+          0.5
+        ],
+        "count": 7,
+        "meanConfidence": 0.4594,
+        "accuracy": 0.2857
+      },
+      {
+        "bin": [
+          0.5,
+          0.6
+        ],
+        "count": 140,
+        "meanConfidence": 0.5468,
+        "accuracy": 0.5
+      },
+      {
+        "bin": [
+          0.6,
+          0.7
+        ],
+        "count": 132,
+        "meanConfidence": 0.6483,
+        "accuracy": 0.5379
+      },
+      {
+        "bin": [
+          0.7,
+          0.8
+        ],
+        "count": 159,
+        "meanConfidence": 0.7464,
+        "accuracy": 0.5912
+      },
+      {
+        "bin": [
+          0.8,
+          0.9
+        ],
+        "count": 237,
+        "meanConfidence": 0.8522,
+        "accuracy": 0.7468
+      },
+      {
+        "bin": [
+          0.9,
+          1.0
+        ],
+        "count": 2272,
+        "meanConfidence": 0.9886,
+        "accuracy": 0.941
+      }
+    ],
+    "perClass": {
+      "WALKING": {
+        "precision": 0.8336,
+        "recall": 0.9194,
+        "f1": 0.8744,
+        "support": 496
+      },
+      "WALKING_UPSTAIRS": {
+        "precision": 0.8988,
+        "recall": 0.811,
+        "f1": 0.8527,
+        "support": 471
+      },
+      "WALKING_DOWNSTAIRS": {
+        "precision": 0.8733,
+        "recall": 0.919,
+        "f1": 0.8956,
+        "support": 420
+      },
+      "SITTING": {
+        "precision": 0.8128,
+        "recall": 0.7515,
+        "f1": 0.781,
+        "support": 491
+      },
+      "STANDING": {
+        "precision": 0.7884,
+        "recall": 0.8402,
+        "f1": 0.8135,
+        "support": 532
+      },
+      "LAYING": {
+        "precision": 1.0,
+        "recall": 0.9534,
+        "f1": 0.9762,
+        "support": 537
+      }
+    },
+    "confusionMatrix": [
+      [
+        456,
+        4,
+        36,
+        0,
+        0,
+        0
+      ],
+      [
+        69,
+        382,
+        20,
+        0,
+        0,
+        0
+      ],
+      [
+        22,
+        12,
+        386,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        0,
+        369,
+        120,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        85,
+        447,
+        0
+      ],
+      [
+        0,
+        25,
+        0,
+        0,
+        0,
+        512
+      ]
+    ]
+  }
+}

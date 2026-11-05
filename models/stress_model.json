@@ -1,0 +1,252 @@
+{
+  "modelId": "stress-v1",
+  "task": "stress_risk",
+  "type": "decision_tree",
+  "classes": [
+    "Low",
+    "Moderate",
+    "High"
+  ],
+  "featureNames": [
+    "Study_Hours_Per_Day",
+    "Sleep_Hours_Per_Day"
+  ],
+  "featureUnits": {
+    "Study_Hours_Per_Day": "hours/day",
+    "Sleep_Hours_Per_Day": "hours/day"
+  },
+  "appInputMapping": {
+    "Study_Hours_Per_Day": "studyHours (hours/day), no transform",
+    "Sleep_Hours_Per_Day": "sleepHours (hours/day), no transform"
+  },
+  "featureRanges": {
+    "Study_Hours_Per_Day": [
+      5.0,
+      10.0
+    ],
+    "Sleep_Hours_Per_Day": [
+      5.0,
+      10.0
+    ]
+  },
+  "scaler": null,
+  "trees": [
+    {
+      "feature": [
+        0,
+        1,
+        -2,
+        -2,
+        0,
+        1,
+        -2,
+        -2,
+        -2
+      ],
+      "threshold": [
+        5.950000047683716,
+        5.950000047683716,
+        -2.0,
+        -2.0,
+        8.050000190734863,
+        5.950000047683716,
+        -2.0,
+        -2.0,
+        -2.0
+      ],
+      "left": [
+        1,
+        2,
+        -1,
+        -1,
+        5,
+        6,
+        -1,
+        -1,
+        -1
+      ],
+      "right": [
+        4,
+        3,
+        -1,
+        -1,
+        8,
+        7,
+        -1,
+        -1,
+        -1
+      ],
+      "value": [
+        [
+          0.3333333333333323,
+          0.3333333333333324,
+          0.33333333333333526
+        ],
+        [
+          0.9350649350649348,
+          0.0,
+          0.06493506493506518
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.5179856115107893,
+          0.4820143884892107
+        ],
+        [
+          0.0,
+          0.8391608391608387,
+          0.16083916083916133
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  ],
+  "metrics": {
+    "test": {
+      "accuracy": 1.0,
+      "macroF1": 1.0,
+      "perClass": {
+        "Low": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 45
+        },
+        "Moderate": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 101
+        },
+        "High": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 154
+        }
+      },
+      "confusionMatrix": [
+        [
+          45,
+          0,
+          0
+        ],
+        [
+          0,
+          101,
+          0
+        ],
+        [
+          0,
+          0,
+          154
+        ]
+      ]
+    },
+    "validation": {
+      "accuracy": 1.0,
+      "macroF1": 1.0,
+      "perClass": {
+        "Low": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 44
+        },
+        "Moderate": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 101
+        },
+        "High": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 155
+        }
+      },
+      "confusionMatrix": [
+        [
+          44,
+          0,
+          0
+        ],
+        [
+          0,
+          101,
+          0
+        ],
+        [
+          0,
+          0,
+          155
+        ]
+      ]
+    },
+    "comparison": {
+      "logistic_regression": {
+        "accuracy": 0.826667,
+        "macroF1": 0.82512
+      },
+      "knn": {
+        "accuracy": 0.99,
+        "macroF1": 0.989164
+      },
+      "svm": {
+        "accuracy": 0.996667,
+        "macroF1": 0.997263
+      },
+      "decision_tree": {
+        "accuracy": 1.0,
+        "macroF1": 1.0
+      },
+      "random_forest": {
+        "accuracy": 1.0,
+        "macroF1": 1.0
+      }
+    }
+  },
+  "dataset": {
+    "name": "student lifestyle dataset (Kaggle, Sumit Kumar / steve1215rogg), version 1",
+    "source": "https://www.kaggle.com/datasets/steve1215rogg/student-lifestyle-dataset (downloaded via https://www.kaggle.com/api/v1/datasets/download/steve1215rogg/student-lifestyle-dataset)",
+    "license": "Apache 2.0 (as declared on the Kaggle dataset page)",
+    "samples": 2000,
+    "labelProvenance": "Rule-derived, not measured. The Kaggle description states the stress level is 'derived based on study and sleep hours'; the rule High if Study>8.0 or Sleep<6.0; else Low if Study<6.0; else Moderate reproduces all 2000 labels. Feature rows also look synthetic (the five activity columns sum to exactly 24 h in every row)."
+  },
+  "trainedAt": "2026-10-29T15:52:18+00:00",
+  "sklearnVersion": "1.6.1",
+  "limitations": [
+    "Labels are rule-derived from study and sleep hours (High if study>8 h or sleep<6 h; Low if study<6 h; else Moderate). The model reproduces that rule; it has not learned stress from any measured or self-reported stress outcome.",
+    "100% test accuracy reflects the deterministic label, not real-world predictive validity. The model has not been validated against any clinical or psychometric stress measure.",
+    "The dataset appears synthetic: the five daily-activity columns sum to exactly 24.0 h in every row and Physical_Activity_Hours_Per_Day is exactly 24 minus the other four.",
+    "Training ranges: study 5-10 h/day, sleep 5-10 h/day. Inputs outside these ranges are extrapolation (e.g. study < 5 h with sleep >= 6 h is classified Low; sleep < 6 h is always High).",
+    "Social activity, physical activity, academic pressure, screen time, self-reported stress and mood have no effect on this model's output.",
+    "Population claimed by the author: students in India / South Asia via Google Forms (unverified).",
+    "Not a medical or diagnostic tool; output is an indicative 'stress-risk' category only."
+  ]
+}

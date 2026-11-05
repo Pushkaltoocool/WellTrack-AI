@@ -1,0 +1,315 @@
+{
+  "modelId": "stress-v1",
+  "classes": [
+    "Low",
+    "Moderate",
+    "High"
+  ],
+  "featureNames": [
+    "Study_Hours_Per_Day",
+    "Sleep_Hours_Per_Day"
+  ],
+  "note": "Raw (unscaled) feature values in featureNames order; proba in classes order; sklearn predict_proba output.",
+  "rows": [
+    {
+      "rowIndex": 172,
+      "studentId": 173,
+      "features": [
+        5.9,
+        7.1
+      ],
+      "trueLabel": "Low",
+      "predictedClass": "Low",
+      "proba": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "rowIndex": 237,
+      "studentId": 238,
+      "features": [
+        5.7,
+        9.6
+      ],
+      "trueLabel": "Low",
+      "predictedClass": "Low",
+      "proba": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "rowIndex": 917,
+      "studentId": 918,
+      "features": [
+        5.6,
+        9.5
+      ],
+      "trueLabel": "Low",
+      "predictedClass": "Low",
+      "proba": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "rowIndex": 1009,
+      "studentId": 1010,
+      "features": [
+        5.9,
+        7.3
+      ],
+      "trueLabel": "Low",
+      "predictedClass": "Low",
+      "proba": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "rowIndex": 1674,
+      "studentId": 1675,
+      "features": [
+        5.6,
+        8.8
+      ],
+      "trueLabel": "Low",
+      "predictedClass": "Low",
+      "proba": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "rowIndex": 1692,
+      "studentId": 1693,
+      "features": [
+        5.0,
+        6.6
+      ],
+      "trueLabel": "Low",
+      "predictedClass": "Low",
+      "proba": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "rowIndex": 1754,
+      "studentId": 1755,
+      "features": [
+        5.1,
+        7.7
+      ],
+      "trueLabel": "Low",
+      "predictedClass": "Low",
+      "proba": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "rowIndex": 73,
+      "studentId": 74,
+      "features": [
+        6.7,
+        9.3
+      ],
+      "trueLabel": "Moderate",
+      "predictedClass": "Moderate",
+      "proba": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "rowIndex": 659,
+      "studentId": 660,
+      "features": [
+        6.1,
+        9.9
+      ],
+      "trueLabel": "Moderate",
+      "predictedClass": "Moderate",
+      "proba": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "rowIndex": 825,
+      "studentId": 826,
+      "features": [
+        7.9,
+        8.4
+      ],
+      "trueLabel": "Moderate",
+      "predictedClass": "Moderate",
+      "proba": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "rowIndex": 898,
+      "studentId": 899,
+      "features": [
+        7.2,
+        7.5
+      ],
+      "trueLabel": "Moderate",
+      "predictedClass": "Moderate",
+      "proba": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "rowIndex": 1208,
+      "studentId": 1209,
+      "features": [
+        7.7,
+        6.2
+      ],
+      "trueLabel": "Moderate",
+      "predictedClass": "Moderate",
+      "proba": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "rowIndex": 1305,
+      "studentId": 1306,
+      "features": [
+        8.0,
+        6.1
+      ],
+      "trueLabel": "Moderate",
+      "predictedClass": "Moderate",
+      "proba": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "rowIndex": 1993,
+      "studentId": 1994,
+      "features": [
+        7.1,
+        9.0
+      ],
+      "trueLabel": "Moderate",
+      "predictedClass": "Moderate",
+      "proba": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "rowIndex": 360,
+      "studentId": 361,
+      "features": [
+        8.1,
+        6.8
+      ],
+      "trueLabel": "High",
+      "predictedClass": "High",
+      "proba": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "rowIndex": 753,
+      "studentId": 754,
+      "features": [
+        9.7,
+        8.1
+      ],
+      "trueLabel": "High",
+      "predictedClass": "High",
+      "proba": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "rowIndex": 888,
+      "studentId": 889,
+      "features": [
+        9.3,
+        8.5
+      ],
+      "trueLabel": "High",
+      "predictedClass": "High",
+      "proba": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "rowIndex": 1201,
+      "studentId": 1202,
+      "features": [
+        8.6,
+        8.9
+      ],
+      "trueLabel": "High",
+      "predictedClass": "High",
+      "proba": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "rowIndex": 1556,
+      "studentId": 1557,
+      "features": [
+        8.2,
+        6.2
+      ],
+      "trueLabel": "High",
+      "predictedClass": "High",
+      "proba": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "rowIndex": 1704,
+      "studentId": 1705,
+      "features": [
+        8.2,
+        8.0
+      ],
+      "trueLabel": "High",
+      "predictedClass": "High",
+      "proba": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  ]
+}
