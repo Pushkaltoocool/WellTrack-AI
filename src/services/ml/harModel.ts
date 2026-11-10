@@ -61,7 +61,7 @@ export function harModelFor(useGyro: boolean): HarModel {
 
 export interface HarPrediction {
   label: ActivityClass;
-  /** Softmax output of the logistic-regression model, per class in HAR_CLASSES order. */
+  /** Softmax output of the logistic-regression model, per class in `model.classes` order (a subset of HAR_CLASSES). */
   probabilities: number[];
   modelId: string;
 }

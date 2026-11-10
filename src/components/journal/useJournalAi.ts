@@ -16,7 +16,7 @@ export function useJournalAi() {
       if (prefs.journalAiConsentAt !== null) return resolve(true);
       Alert.alert(
         'Let Wren read your entries?',
-        'To name the feelings in an entry and ask follow-up questions, the entry’s text is sent to OpenRouter and the AI model provider. WellTrack doesn’t store it on any server. Without this, entries are read on your phone with a simpler keyword method. You can change this any time in Settings.',
+        'To name the feelings in an entry and ask follow-up questions, the entry’s text is sent to OpenRouter and the AI model provider. Wren doesn’t store it on any server. Without this, entries are read on your phone with a simpler keyword method. You can change this any time in Settings.',
         [
           { text: 'Keep on my phone', style: 'cancel', onPress: () => resolve(false) },
           { text: 'Allow', onPress: () => { void updatePrefs({ journalAiConsentAt: Date.now() }); resolve(true); } },

@@ -146,6 +146,24 @@ export const MIGRATIONS: readonly string[] = [
   ALTER TABLE journal_entries ADD COLUMN tags TEXT NOT NULL DEFAULT '';
   ALTER TABLE journal_entries ADD COLUMN writing_seconds INTEGER NOT NULL DEFAULT 0;
   `,
+  // v6 — all-day activity: the OS motion history (minutes per type per day) and the Android
+  // background run of our own model (estimated seconds per class per day). Both are re-derivable
+  // caches of on-device data, so they are wiped with everything else but not backed up.
+  `
+  CREATE TABLE IF NOT EXISTS motion_days (
+    date_key TEXT PRIMARY KEY NOT NULL,
+    source TEXT NOT NULL,
+    minutes_json TEXT NOT NULL,
+    synced_at INTEGER NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS background_activity (
+    date_key TEXT PRIMARY KEY NOT NULL,
+    model_id TEXT NOT NULL,
+    durations_json TEXT NOT NULL,
+    window_count INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;
@@ -163,6 +181,8 @@ export const USER_TABLES = [
   'coach_messages',
   'journal_entries',
   'practice_sessions',
+  'motion_days',
+  'background_activity',
 ] as const;
 
 /** Tables restored from a backup, keyed by their name in the export JSON (preferences are handled separately). */

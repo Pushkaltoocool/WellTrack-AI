@@ -1,0 +1,36 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+  <!-- Activity Recognition on Android 9 and lower. -->
+  <uses-permission
+    android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION"
+    android:maxSdkVersion="28" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+  <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+  <application>
+    <service
+      android:name="expo.modules.motionactivity.SensorCaptureService"
+      android:exported="false"
+      android:foregroundServiceType="health" />
+
+    <service
+      android:name="expo.modules.motionactivity.RecordingKeepAliveService"
+      android:exported="false"
+      android:foregroundServiceType="health" />
+
+    <receiver
+      android:name="expo.modules.motionactivity.TransitionReceiver"
+      android:exported="false" />
+
+    <receiver
+      android:name="expo.modules.motionactivity.BootReceiver"
+      android:exported="false">
+      <intent-filter>
+        <action android:name="android.intent.action.BOOT_COMPLETED" />
+        <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+      </intent-filter>
+    </receiver>
+  </application>
+</manifest>

@@ -60,7 +60,7 @@ export default function ExamsScreen() {
   const next = data?.upcoming[0];
   const soon = next && daysBetween(today, next.dateKey) <= 7;
   return (
-    <Screen back title="Exams & deadlines" subtitle="WellTrack adjusts suggestions in busy weeks and can remind you the evening before.">
+    <Screen back title="Exams & deadlines" subtitle="Wren adjusts suggestions in busy weeks and can remind you the evening before.">
       <View style={styles.stack}>
         {soon && next ? (
           <Card style={{ borderWidth: 1, borderColor: colors.amber }}>

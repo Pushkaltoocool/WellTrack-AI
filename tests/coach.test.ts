@@ -43,7 +43,7 @@ function input(patch: Partial<CoachContextInput> = {}): CoachContextInput {
 describe('buildCoachContext', () => {
   it('starts with the sharing statement and uses the first name only', () => {
     const text = buildCoachContext(input());
-    expect(text.split('\n')[0]).toBe('Data the user chose to share from WellTrack (self-reported unless marked):');
+    expect(text.split('\n')[0]).toBe('Data the user chose to share from the Wren app (self-reported unless marked):');
     expect(text).toContain('First name: Alex');
     expect(text).not.toContain('Morgan');
     expect(text).toContain('Steps today (measured): 4,210');

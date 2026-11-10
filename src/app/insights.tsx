@@ -91,7 +91,7 @@ function PatternsCard({ patterns, enough, needed }: { patterns: Pattern[]; enoug
       <View style={{ gap: 12 }}>
         <AppText variant="heading">Patterns in your days</AppText>
         {!enough ? (
-          <EmptyState compact icon="analytics-outline" title="Still learning your rhythm" body={`Check in on ${needed} more day${needed === 1 ? '' : 's'} and WellTrack will look for links between your habits, mood and stress.`} />
+          <EmptyState compact icon="analytics-outline" title="Still learning your rhythm" body={`Check in on ${needed} more day${needed === 1 ? '' : 's'} and Wren will look for links between your habits, mood and stress.`} />
         ) : patterns.length === 0 ? (
           <AppText secondary>No clear patterns yet. Your days look fairly similar, or the differences are too small to call. Keep checking in.</AppText>
         ) : (
@@ -127,7 +127,7 @@ function ModelCard({ model }: { model: PersonalModel }) {
           </>
         ) : model.status === 'not-better' ? (
           <Notice tone="info" title="Not reliable yet">
-            {`On ${model.n} days, your habits don’t predict your stress better than simply guessing your average. WellTrack won’t show a model it can’t trust. It will check again as you log more.`}
+            {`On ${model.n} days, your habits don’t predict your stress better than simply guessing your average. Wren won’t show a model it can’t trust. It will check again as you log more.`}
           </Notice>
         ) : (
           <>

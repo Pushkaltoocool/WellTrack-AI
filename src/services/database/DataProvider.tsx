@@ -76,7 +76,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         <ScreenBackground />
         <AppText variant="title">Storage unavailable</AppText>
         <AppText secondary align="center">
-          WellTrack could not open its local database: {error}
+          Wren could not open its local database: {error}
         </AppText>
         <Button label="Try again" onPress={() => setAttempt((a) => a + 1)} />
       </View>

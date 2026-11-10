@@ -3,8 +3,21 @@
  * user scrolls down and expands again on scroll up or tap. Screens outside the tab navigator get
  * the no-op default, so `Screen` can call these hooks unconditionally.
  */
+import type { Ionicons } from '@expo/vector-icons';
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Keyboard, Platform, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
+
+import { AI_ENABLED } from '@/services/ai/llm';
+
+type IconName = keyof typeof Ionicons.glyphMap;
+export interface TabDestination { name: string; label: string; icon: IconName; activeIcon: IconName; }
+export const TAB_DESTINATIONS: TabDestination[] = [
+  { name: 'home', label: 'Today', icon: 'home-outline', activeIcon: 'home' },
+  { name: 'journal', label: 'Journal', icon: 'book-outline', activeIcon: 'book' },
+  ...(AI_ENABLED ? [{ name: 'coach', label: 'Wren', icon: 'chatbubble-ellipses-outline', activeIcon: 'chatbubble-ellipses' } as const] : []),
+  { name: 'trends', label: 'Trends', icon: 'stats-chart-outline', activeIcon: 'stats-chart' },
+  { name: 'explore', label: 'Explore', icon: 'compass-outline', activeIcon: 'compass' },
+];
 
 interface TabBarState {
   /** Name of the tab route whose scroll collapsed the bar (null = expanded). */
@@ -75,4 +88,9 @@ export const TAB_BAR_HEIGHT = 68;
 export const TAB_BAR_COLLAPSED = 60;
 export function tabBarBottom(insetBottom: number) {
   return Math.max(insetBottom, 14);
+}
+
+/** Distance from the screen bottom to just above the tab bar, for floating controls on tab screens. */
+export function aboveTabBar(insetBottom: number): number {
+  return tabBarBottom(insetBottom) + TAB_BAR_HEIGHT;
 }

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "WellTrack AI",
+    "name": "Wren",
     "slug": "welltrack-ai",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,16 +8,46 @@
     "scheme": "welltrack",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.welltrackai.app",
-      "buildNumber": "1",
       "supportsTablet": false,
       "usesAppleSignIn": true,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "While you record an activity to help train Wren, location keeps the recording running with your screen locked. Wren never stores or sends where you are.",
+        "UIBackgroundModes": [
+          "location",
+          "location"
+        ]
       },
       "privacyManifests": {
         "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryDiskSpace",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "85F4.1",
+              "E174.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "0A2A.1",
+              "3B52.1",
+              "C617.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "35F9.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "CA92.1"
+            ]
+          },
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryDiskSpace",
             "NSPrivacyAccessedAPITypeReasons": [
@@ -51,7 +81,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#0A1230",
+        "backgroundColor": "#F6F2EC",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -60,6 +90,8 @@
       "package": "com.welltrackai.app",
       "versionCode": 1,
       "permissions": [
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
         "android.permission.USE_BIOMETRIC",
         "android.permission.USE_FINGERPRINT"
       ]
@@ -72,9 +104,13 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#070B1A",
+          "backgroundColor": "#F6F2EC",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 160,
+          "dark": {
+            "backgroundColor": "#121621",
+            "image": "./assets/images/splash-icon.png"
+          }
         }
       ],
       "expo-sqlite",
@@ -82,14 +118,14 @@
       [
         "expo-sensors",
         {
-          "motionPermission": "WellTrack reads your step count and motion to show daily activity. This data stays on your device."
+          "motionPermission": "Wren reads your motion and step history to show how you move through the day. Nothing is shared unless you choose to contribute it for research."
         }
       ],
       "@react-native-community/datetimepicker",
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "WellTrack uses Face ID to keep your journal private when app lock is on."
+          "faceIDPermission": "Wren uses Face ID to keep your journal private when app lock is on."
         }
       ],
       "expo-apple-authentication",
@@ -102,9 +138,61 @@
       [
         "@kingstinct/react-native-healthkit",
         {
-          "NSHealthShareUsageDescription": "WellTrack AI reads your sleep, steps, active energy, mindful minutes and time in daylight to show your trends. Health data stays on your phone.",
-          "NSHealthUpdateUsageDescription": false,
+          "NSHealthShareUsageDescription": "Wren reads your sleep, steps, active energy, mindful minutes and time in daylight to show your trends. Health data stays on your phone.",
+          "NSHealthUpdateUsageDescription": "Wren never writes to Apple Health. It only reads the sleep, steps, active energy, mindful minutes and daylight data you choose to share, so it can show your wellbeing trends.",
           "background": false
+        }
+      ],
+      [
+        "expo-widgets",
+        {
+          "widgets": [
+            {
+              "name": "CrewWidget",
+              "displayName": "Wren & crew",
+              "description": "A line from Wren, Pika or Char through the day. Tap to write about it.",
+              "ios": {
+                "supportedFamilies": [
+                  "systemSmall",
+                  "systemMedium",
+                  "systemLarge"
+                ],
+                "configuration": {
+                  "title": "Who’s on your home screen?",
+                  "description": "Pick a companion, or let the time of day decide.",
+                  "parameters": {
+                    "companion": {
+                      "title": "Companion",
+                      "type": "enum",
+                      "default": "auto",
+                      "values": [
+                        {
+                          "name": "Surprise me",
+                          "value": "auto"
+                        },
+                        {
+                          "name": "Wren",
+                          "value": "wren"
+                        },
+                        {
+                          "name": "Pika",
+                          "value": "pika"
+                        },
+                        {
+                          "name": "Char",
+                          "value": "char"
+                        },
+                        {
+                          "name": "The whole crew",
+                          "value": "crew"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
         }
       ]
     ],
@@ -124,6 +212,12 @@
         "projectId": "be20155c-d12d-4686-b499-4312d392b4c1"
       }
     },
-    "owner": "pushkaltoocool"
+    "owner": "pushkaltoocool",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/be20155c-d12d-4686-b499-4312d392b4c1"
+    }
   }
 }

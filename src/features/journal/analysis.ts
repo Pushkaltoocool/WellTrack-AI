@@ -529,7 +529,7 @@ export function analyzeLocally(text: string): JournalAnalysis {
 // AI analysis: prompt
 // ---------------------------------------------------------------------------------------------
 
-export const JOURNAL_ANALYSIS_SYSTEM_PROMPT = `You read one private journal entry written by a student in WellTrack, a wellbeing app, and describe the feelings in it.
+export const JOURNAL_ANALYSIS_SYSTEM_PROMPT = `You read one private journal entry written by a student in Wren, a wellbeing app, and describe the feelings in it.
 
 Reply with ONE JSON object and nothing else: no markdown, no code fences, no commentary before or after it.
 

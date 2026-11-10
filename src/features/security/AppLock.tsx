@@ -23,7 +23,7 @@ export async function canUseAppLock(): Promise<{ ok: boolean; reason?: string }>
   return { ok: true };
 }
 
-export async function authenticate(prompt = 'Unlock WellTrack'): Promise<boolean> {
+export async function authenticate(prompt = 'Unlock Wren'): Promise<boolean> {
   const res = await LocalAuthentication.authenticateAsync({ promptMessage: prompt, cancelLabel: 'Cancel' });
   return res.success;
 }
@@ -87,7 +87,7 @@ export function AppLock({ children }: { children: ReactNode }) {
       {showCover ? (
         <View style={styles.cover} accessibilityViewIsModal>
           <Owl mood={3} pose={locked ? 'sleep' : 'calm'} size={140} />
-          <AppText variant="title" align="center">WellTrack is locked</AppText>
+          <AppText variant="title" align="center">Wren is locked</AppText>
           {locked ? (
             <>
               <AppText secondary align="center">Your journal stays private until you unlock.</AppText>

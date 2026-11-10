@@ -27,6 +27,8 @@ import { firebaseAuth } from './app';
 export { authErrorMessage, isCancelled, validateSignUp } from './authErrors';
 
 const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
+/** iOS needs its own OAuth client (Firebase → iOS app); app.config.js adds the matching URL scheme. */
+const GOOGLE_IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
 
 export async function signUpWithEmail(name: string, email: string, password: string): Promise<User> {
   const cred = await createUserWithEmailAndPassword(firebaseAuth(), email.trim(), password);
@@ -88,11 +90,12 @@ function googleModule(): GoogleSigninModule | null {
   if (google !== undefined) return google;
   google = null;
   if (isRunningInExpoGo() || !GOOGLE_WEB_CLIENT_ID) return null;
+  if (Platform.OS === 'ios' && !GOOGLE_IOS_CLIENT_ID) return null;
   try {
     // Lazy so Expo Go never evaluates the native module.
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     google = require('@react-native-google-signin/google-signin') as GoogleSigninModule;
-    google.GoogleSignin.configure({ webClientId: GOOGLE_WEB_CLIENT_ID });
+    google.GoogleSignin.configure({ webClientId: GOOGLE_WEB_CLIENT_ID, iosClientId: GOOGLE_IOS_CLIENT_ID });
   } catch {
     google = null;
   }
@@ -115,7 +118,7 @@ export async function signInWithGoogle(): Promise<User> {
   return (await signInWithCredential(firebaseAuth(), GoogleAuthProvider.credential(idToken))).user;
 }
 
-// ---------- Sign in with Apple (iOS builds; Expo Go tokens are issued to Expo Go, not WellTrack) ----------
+// ---------- Sign in with Apple (iOS builds; Expo Go tokens are issued to Expo Go, not Wren) ----------
 
 export async function appleSignInAvailable(): Promise<boolean> {
   if (Platform.OS !== 'ios' || isRunningInExpoGo()) return false;

@@ -1,11 +1,12 @@
 /**
- * The portable WellTrack data format, shared by JSON export/import and cloud backup.
+ * The portable Wren data format, shared by JSON export/import and cloud backup.
  * Pure (no database access) so it can be validated and unit-tested in isolation.
  */
 import { DEFAULT_PREFERENCES, type Preferences } from '@/types/domain';
 
 import { BACKUP_TABLES, SCHEMA_VERSION } from './schema';
 
+/** Kept from the app's former name so existing exports and cloud backups stay readable. */
 export const EXPORT_APP_ID = 'WellTrack AI';
 
 type Row = Record<string, unknown>;
@@ -21,12 +22,12 @@ export class BackupFormatError extends Error {}
 
 /** Validates untrusted JSON (a picked file or a cloud document) and returns a typed export. */
 export function parseExport(raw: unknown): WellTrackExport {
-  if (!raw || typeof raw !== 'object') throw new BackupFormatError('This file is not a WellTrack export.');
+  if (!raw || typeof raw !== 'object') throw new BackupFormatError('This file is not a Wren export.');
   const d = raw as Row;
-  if (d.app !== EXPORT_APP_ID) throw new BackupFormatError('This file was not exported by WellTrack AI.');
+  if (d.app !== EXPORT_APP_ID) throw new BackupFormatError('This file was not exported by Wren.');
   const version = typeof d.schemaVersion === 'number' ? d.schemaVersion : 2;
   if (version > SCHEMA_VERSION) {
-    throw new BackupFormatError(`This backup comes from a newer version of WellTrack (data v${version}). Update the app first.`);
+    throw new BackupFormatError(`This backup comes from a newer version of Wren (data v${version}). Update the app first.`);
   }
   const out: WellTrackExport = {
     exportedAt: typeof d.exportedAt === 'string' ? d.exportedAt : new Date(0).toISOString(),

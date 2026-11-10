@@ -29,11 +29,14 @@ import {
   type SampleBuffer,
 } from './harRecordingFormat';
 import { saveRecording } from './harRecordingStore';
+import { ACTIVITY_SYMBOLS, beginBackgroundRecording, endBackgroundRecording } from './recordingSession';
 
 export type RecorderPhase = 'idle' | 'countdown' | 'recording' | 'saving';
 
 export interface RecorderSnapshot {
   phase: RecorderPhase;
+  /** True once the recording will survive the phone being locked. */
+  lockSafe: boolean;
   countdown: number;
   elapsedSeconds: number;
   sampleCount: number;
@@ -49,6 +52,8 @@ export interface RecorderOptions {
   countdownSeconds: number;
   /** Auto-stop after this many seconds; null records until stopped (capped at MAX_RECORDING_S). */
   limitSeconds: number | null;
+  /** Keep recording with the phone locked (iOS location keep-alive / Android foreground service) and show a Live Activity. */
+  background?: { label: string; placement: string } | null;
 }
 
 export type StopResult = { saved: true; meta: RecordingMeta } | { saved: false; reason: string };
@@ -73,6 +78,8 @@ interface Runtime {
   rateWindowStart: number;
   accRate: number;
   gyroRate: number;
+  /** The keep-alive is running, so backgrounding the app must not stop the recording. */
+  keepAlive: boolean;
 }
 
 function freshRuntime(): Runtime {
@@ -92,10 +99,11 @@ function freshRuntime(): Runtime {
     rateWindowStart: 0,
     accRate: 0,
     gyroRate: 0,
+    keepAlive: false,
   };
 }
 
-const IDLE: RecorderSnapshot = { phase: 'idle', countdown: 0, elapsedSeconds: 0, sampleCount: 0, segments: 0, accRateHz: 0, gyroRateHz: 0 };
+const IDLE: RecorderSnapshot = { phase: 'idle', lockSafe: false, countdown: 0, elapsedSeconds: 0, sampleCount: 0, segments: 0, accRateHz: 0, gyroRateHz: 0 };
 
 export function useHarRecorder(onSaved?: (meta: RecordingMeta) => void) {
   const rt = useRef<Runtime>(freshRuntime());
@@ -114,6 +122,7 @@ export function useHarRecorder(onSaved?: (meta: RecordingMeta) => void) {
     const r = rt.current;
     setSnap({
       phase,
+      lockSafe: r.keepAlive,
       countdown,
       elapsedSeconds: r.buf.t.length / 50,
       sampleCount: r.buf.t.length,
@@ -196,8 +205,10 @@ export function useHarRecorder(onSaved?: (meta: RecordingMeta) => void) {
       if (phase === 'countdown' || !opts) {
         rt.current = freshRuntime();
         setPhase('idle');
+        void endBackgroundRecording(null);
         return null; // cancelled before any data was recorded
       }
+      void endBackgroundRecording(Date.now());
       setPhase('saving');
       const finish = (res: StopResult) => {
         setPhase('idle');
@@ -248,6 +259,18 @@ export function useHarRecorder(onSaved?: (meta: RecordingMeta) => void) {
     subscribe();
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => undefined);
     setPhase('recording');
+    const bg = r.opts?.background;
+    if (bg && r.opts) {
+      const startedAtMs = r.startedAt;
+      void beginBackgroundRecording({ label: bg.label, placement: bg.placement, symbol: ACTIVITY_SYMBOLS[r.opts.label] ?? 'figure.walk', startedAtMs }).then((ok) => {
+        // Ignore a late answer for a recording that has already ended.
+        if (rt.current.startedAt !== startedAtMs || phaseRef.current !== 'recording') return;
+        rt.current.keepAlive = ok;
+        // Safe to lock: let the screen sleep instead of holding it on for the whole recording.
+        if (ok) void deactivateKeepAwake(KEEP_AWAKE_TAG).catch(() => undefined);
+        setPhase('recording');
+      });
+    }
   }, [setPhase, subscribe]);
 
   const start = useCallback(
@@ -305,11 +328,12 @@ export function useHarRecorder(onSaved?: (meta: RecordingMeta) => void) {
     return () => clearInterval(id);
   }, [recording, setPhase, stop]);
 
-  // JS sensors stop when the app is backgrounded: save what was recorded so far. iOS 'inactive'
-  // (Notification/Control Centre pulled down) keeps sensors running, so it doesn't stop the recording.
+  // Without the keep-alive, JS sensors stop when the app is backgrounded: save what was recorded so
+  // far. With it, the recording carries on with the phone locked. iOS 'inactive' (Notification or
+  // Control Centre pulled down) keeps sensors running either way.
   useEffect(() => {
     const sub = AppState.addEventListener('change', (state) => {
-      if (state === 'background') void stop('background');
+      if (state === 'background' && !rt.current.keepAlive) void stop('background');
     });
     return () => sub.remove();
   }, [stop]);

@@ -7,30 +7,47 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "environment": "development"
+      "environment": "development",
+      "channel": "development"
     },
     "preview": {
       "developmentClient": false,
       "node": "24.14.1",
       "distribution": "internal",
       "environment": "preview",
-      "env": { "EXPO_NO_DOTENV": "1" },
-      "android": { "buildType": "apk", "autoIncrement": true }
+      "env": {
+        "EXPO_NO_DOTENV": "1"
+      },
+      "android": {
+        "buildType": "apk",
+        "autoIncrement": true
+      },
+      "channel": "preview"
     },
     "production": {
       "autoIncrement": true,
-      "environment": "production"
+      "environment": "production",
+      "channel": "production"
     },
     "testflight": {
       "node": "24.14.1",
       "distribution": "store",
       "environment": "preview",
-      "env": { "EXPO_NO_DOTENV": "1" },
-      "ios": { "autoIncrement": true }
+      "env": {
+        "EXPO_NO_DOTENV": "1"
+      },
+      "ios": {
+        "autoIncrement": true
+      },
+      "channel": "testflight"
     }
   },
   "submit": {
     "production": {},
-    "testflight": {}
+    "testflight": {
+      "ios": {
+        "ascAppId": "6832796254"
+      }
+    }
   }
 }

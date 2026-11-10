@@ -2,9 +2,10 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import * as Haptics from 'expo-haptics';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef, useState, type ComponentRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ComponentRef, type ReactNode, type RefObject } from 'react';
 import {
-  ActivityIndicator, Alert, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Switch, TextInput, View,
+  ActivityIndicator, Alert, Keyboard, LayoutAnimation, Modal, Platform, Pressable, ScrollView, StyleSheet, Switch, TextInput, View,
+  type KeyboardEvent,
 } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,11 +15,13 @@ import { BLOCK_STYLES, JournalSpans, JournalText } from '@/components/journal/Jo
 import { useJournalAi } from '@/components/journal/useJournalAi';
 import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
+import { Companion } from '@/components/ui/Companions';
 import type { JournalAnalysis } from '@/features/journal/analysis';
 import { deeperQuestion } from '@/features/journal/deeper';
 import { analyzeAndStore, saveEntry, SUGGESTED_TAGS, toEntry, type JournalEntry } from '@/features/journal/journalService';
 import { blockAt, parseTags, setBlock, stripMarkdown, toggleInline, type Block, type InlineMark } from '@/features/journal/markdown';
 import { morePrompts, promptForDay } from '@/features/journal/prompts';
+import { promptFor, slotAt } from '@/features/widgets/crewQuotes';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { dateKey as toDateKey, parseDateKey, todayKey } from '@/lib/dates';
 import { useData, useDbQuery } from '@/services/database/DataProvider';
@@ -40,7 +43,7 @@ export default function EntryRoute() {
       </>}
     </View>;
   }
-  return <EntryScreen key={data?.id ?? 'new'} initial={data ? toEntry(data) : null}
+  return <EntryScreen key={data?.id ?? `new:${params.prompt ?? ''}`} initial={data ? toEntry(data) : null}
     initialPrompt={params.prompt ?? null} initialDate={params.date && /^\d{4}-\d{2}-\d{2}$/.test(params.date) ? params.date : todayKey()} />;
 }
 
@@ -55,6 +58,8 @@ function EntryScreen({ initial, initialPrompt, initialDate }: { initial: Journal
   const insets = useSafeAreaInsets();
   const reduceMotion = useReducedMotion();
   const input = useRef<ComponentRef<typeof TextInput>>(null);
+  const rootRef = useRef<ComponentRef<typeof View>>(null);
+  const keyboard = useKeyboardOverlap(rootRef);
 
   const [mode, setMode] = useState<'edit' | 'read'>(initial ? 'read' : 'edit');
   const [entryId, setEntryId] = useState<number | null>(initial?.id ?? null);
@@ -237,7 +242,7 @@ function EntryScreen({ initial, initialPrompt, initialDate }: { initial: Journal
     </View>;
   }
 
-  return <KeyboardAvoidingView style={styles.root} behavior="padding">
+  return <View ref={rootRef} style={styles.root}>
     {header}
     <ScrollView contentContainerStyle={styles.editContent} keyboardShouldPersistTaps="handled" onScrollBeginDrag={() => setPanel((p) => (p === 'plus' ? null : p))}>
       {meta}
@@ -263,14 +268,18 @@ function EntryScreen({ initial, initialPrompt, initialDate }: { initial: Journal
       </TextInput>
     </ScrollView>
 
-    {panel === 'plus' ? <Animated.View entering={reduceMotion ? undefined : FadeInDown.duration(160)} style={[styles.popover, { bottom: 76 + (panel === 'plus' ? 0 : 0) }]}>
-      <MenuItem icon="bulb-outline" label="Journaling suggestions" onPress={() => openSheet('prompts')} />
-      <MenuItem icon="pricetags-outline" label="Edit tags" onPress={() => openSheet('tags')} />
-      <MenuItem icon="calendar-outline" label="Change date" onPress={() => openSheet('details')} />
-      <AppText variant="caption" muted style={{ paddingHorizontal: 16, paddingTop: 6 }}>Tip: use your keyboard’s microphone to dictate.</AppText>
+    {panel === 'plus' ? <Animated.View entering={reduceMotion ? undefined : FadeInDown.duration(160)} style={[styles.popover, { bottom: 72 + keyboard + (keyboard ? 0 : Math.max(insets.bottom, 12)) }]}>
+      <PlusMenu
+        onPrompt={(p) => { setPrompt(p); setPanel(null); input.current?.focus(); }}
+        onMore={() => openSheet('prompts')}
+        onTags={() => openSheet('tags')}
+        onDate={() => openSheet('details')}
+        tags={tags}
+        day={day}
+      />
     </Animated.View> : null}
 
-    {panel === 'format' ? <Animated.View entering={reduceMotion ? undefined : FadeIn.duration(160)} style={[styles.formatPanel, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+    {panel === 'format' ? <Animated.View entering={reduceMotion ? undefined : FadeIn.duration(160)} style={[styles.formatPanel, { paddingBottom: keyboard ? 12 : Math.max(insets.bottom, 16) }]}>
       <View style={styles.formatRow}>
         <View style={styles.segment}>
           {([['bold', 'B'], ['italic', 'I'], ['underline', 'U'], ['strike', 'S']] as const).map(([mark, label], i) => (
@@ -297,7 +306,7 @@ function EntryScreen({ initial, initialPrompt, initialDate }: { initial: Journal
           </Pressable>;
         })}
       </ScrollView>
-    </Animated.View> : <View style={[styles.toolbar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
+    </Animated.View> : <View style={[styles.toolbar, { paddingBottom: keyboard ? 10 : Math.max(insets.bottom, 12) }]}>
       <Pressable onPress={() => setPanel((p) => (p === 'plus' ? null : 'plus'))} accessibilityRole="button" accessibilityLabel="More" style={[styles.round, panel === 'plus' && { backgroundColor: colors.surfaceAlt }]}>
         <Ionicons name={panel === 'plus' ? 'close' : 'add'} size={26} color={colors.text} />
       </Pressable>
@@ -312,8 +321,9 @@ function EntryScreen({ initial, initialPrompt, initialDate }: { initial: Journal
         {saving ? <ActivityIndicator color={colors.onInk} /> : <Ionicons name={hasText ? 'chevron-forward' : 'close'} size={24} color={colors.onInk} />}
       </Pressable>
     </View>}
+    {keyboard > 0 ? <View style={{ height: keyboard }} /> : null}
     {renderSheets()}
-  </KeyboardAvoidingView>;
+  </View>;
 
   function renderSheets() {
     return <>
@@ -353,12 +363,70 @@ function EntryScreen({ initial, initialPrompt, initialDate }: { initial: Journal
   }
 }
 
-function MenuItem({ icon, label, onPress }: { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void }) {
+/** How much of this view the keyboard covers, measured in window coordinates (works inside iOS sheets). */
+function useKeyboardOverlap(ref: RefObject<ComponentRef<typeof View> | null>): number {
+  const [overlap, setOverlap] = useState(0);
+  useEffect(() => {
+    const animate = (e: KeyboardEvent) => {
+      if (Platform.OS === 'ios' && e.duration) LayoutAnimation.configureNext(LayoutAnimation.create(e.duration, LayoutAnimation.Types.keyboard, LayoutAnimation.Properties.scaleY));
+    };
+    const onChange = (e: KeyboardEvent) => {
+      const keyboardTop = e.endCoordinates.screenY;
+      ref.current?.measureInWindow((_x, y, _w, h) => {
+        animate(e);
+        setOverlap(Math.max(0, Math.round(y + h - keyboardTop)));
+      });
+    };
+    const onHide = (e: KeyboardEvent) => {
+      animate(e);
+      setOverlap(0);
+    };
+    const subs = [
+      Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillChangeFrame' : 'keyboardDidShow', onChange),
+      Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', onHide),
+    ];
+    return () => subs.forEach((s) => s.remove());
+  }, [ref]);
+  return overlap;
+}
+
+/** The "+" menu: a nudge from whichever companion owns this part of the day, prompts, then entry details. */
+function PlusMenu({ onPrompt, onMore, onTags, onDate, tags, day }: {
+  onPrompt: (p: string) => void; onMore: () => void; onTags: () => void; onDate: () => void; tags: string[]; day: string;
+}) {
+  const styles = useStyles(makeStyles);
+  const [slot] = useState(() => slotAt(Date.now()));
+  const today = promptForDay(todayKey());
+  const who = slot.speaker === 'crew' ? 'wren' : slot.speaker;
+  return <View>
+    <Pressable onPress={() => onPrompt(promptFor(slot))} accessibilityRole="button" accessibilityLabel={`Write about: ${slot.quote}`}
+      style={({ pressed }) => [styles.nudge, pressed && { opacity: 0.85 }]}>
+      <Companion id={who} size={44} pose={slot.pose === 'sleep' ? 'sleep' : 'cheer'} />
+      <View style={{ flex: 1, gap: 2 }}>
+        <AppText style={styles.nudgeQuote} numberOfLines={3}>{`“${slot.quote}”`}</AppText>
+        <AppText variant="caption" muted>Write about this</AppText>
+      </View>
+    </Pressable>
+    <MenuRow icon="sunny-outline" label="Today’s prompt" detail={today} onPress={() => onPrompt(today)} />
+    <MenuRow icon="bulb-outline" label="More ideas" onPress={onMore} />
+    <View style={styles.menuRule} />
+    <MenuRow icon="pricetags-outline" label="Tags" value={tags.length ? tags.map((t) => `#${t}`).join(' ') : 'None'} onPress={onTags} />
+    <MenuRow icon="calendar-outline" label="Date" value={parseDateKey(day).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} onPress={onDate} />
+    <View style={{ height: 6 }} />
+  </View>;
+}
+
+function MenuRow({ icon, label, detail, value, onPress }: { icon: keyof typeof Ionicons.glyphMap; label: string; detail?: string; value?: string; onPress: () => void }) {
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
-  return <Pressable onPress={onPress} accessibilityRole="button" style={({ pressed }) => [styles.menuItem, pressed && { backgroundColor: colors.bg }]}>
-    <Ionicons name={icon} size={23} color={colors.text} />
-    <AppText style={{ fontSize: 18 }}>{label}</AppText>
+  return <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={value ? `${label}: ${value}` : label}
+    style={({ pressed }) => [styles.menuItem, pressed && { backgroundColor: colors.bg }]}>
+    <View style={styles.menuIcon}><Ionicons name={icon} size={18} color={colors.text} /></View>
+    <View style={{ flex: 1 }}>
+      <AppText style={{ fontSize: 17 }}>{label}</AppText>
+      {detail ? <AppText variant="caption" muted numberOfLines={1}>{detail}</AppText> : null}
+    </View>
+    {value ? <AppText variant="caption" secondary numberOfLines={1} style={{ maxWidth: 110 }}>{value}</AppText> : null}
   </Pressable>;
 }
 
@@ -460,8 +528,12 @@ const makeStyles = (c: Palette, t: Theme) => StyleSheet.create({
   placeholder: { fontFamily: fonts.italic, fontSize: 28, lineHeight: 36 },
   toolbar: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingTop: 10 },
   deeper: { height: 52, paddingHorizontal: 18, borderRadius: 18, justifyContent: 'center', backgroundColor: c.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: c.borderStrong },
-  popover: { position: 'absolute', left: 16, width: 290, paddingVertical: 10, borderRadius: 32, backgroundColor: c.surface, ...t.shadow.float },
-  menuItem: { flexDirection: 'row', alignItems: 'center', gap: 18, paddingHorizontal: 22, minHeight: 54 },
+  popover: { position: 'absolute', left: 14, right: 14, maxWidth: 380, paddingTop: 8, paddingBottom: 4, borderRadius: 28, backgroundColor: c.surface, overflow: 'hidden', ...t.shadow.float },
+  nudge: { flexDirection: 'row', alignItems: 'center', gap: 12, marginHorizontal: 8, marginBottom: 6, padding: 12, borderRadius: 20, backgroundColor: c.surfaceAlt },
+  nudgeQuote: { fontFamily: fonts.italic, fontSize: 17, lineHeight: 22, color: c.text },
+  menuItem: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 18, minHeight: 52 },
+  menuIcon: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: c.surfaceAlt },
+  menuRule: { height: StyleSheet.hairlineWidth, backgroundColor: c.border, marginHorizontal: 18, marginVertical: 4 },
   formatPanel: { backgroundColor: c.surfaceAlt, borderTopLeftRadius: 36, borderTopRightRadius: 36, paddingHorizontal: 16, paddingTop: 16, gap: 16 },
   formatRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   segment: { flexDirection: 'row', flex: 1, borderRadius: 14, overflow: 'hidden', backgroundColor: c.bg },

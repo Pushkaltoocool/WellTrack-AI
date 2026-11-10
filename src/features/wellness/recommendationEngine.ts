@@ -40,7 +40,7 @@ export function generateRecommendations(ctx: RecommendationContext): Recommendat
       category: 'general',
       priority: 60,
       title: "Log today's check-in",
-      body: 'A 1-minute check-in lets WellTrack tailor suggestions to how your day is actually going.',
+      body: 'A 1-minute check-in lets Wren tailor suggestions to how your day is actually going.',
       evidence: latest ? `Your last check-in was on ${latest.dateKey}.` : 'No check-ins recorded yet.',
       actions: [{ kind: 'navigate', label: 'Start check-in', route: '/checkin' }],
     });

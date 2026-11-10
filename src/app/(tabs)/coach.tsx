@@ -12,7 +12,7 @@ import { Owl } from '@/components/ui/Owl';
 import { RichText } from '@/components/ui/RichText';
 import { Screen } from '@/components/ui/Screen';
 import { SourceTag } from '@/components/ui/SourceTag';
-import { TAB_BAR_HEIGHT, tabBarBottom, useKeyboardVisible } from '@/components/ui/tabBarState';
+import { aboveTabBar, useKeyboardVisible } from '@/components/ui/tabBarState';
 import { sendCoachMessage, WEEKLY_PROMPT } from '@/features/coach/coachService';
 import { CRISIS_MESSAGE, detectCrisis } from '@/features/coach/safety';
 import { todayKey } from '@/lib/dates';
@@ -35,7 +35,7 @@ export default function CoachScreen() {
   if (!AI_ENABLED) {
     return (
       <Screen title="Wren">
-        <Notice tone="info" title="The AI coach isn’t available in this build">Everything else in WellTrack works without it.</Notice>
+        <Notice tone="info" title="The AI coach isn’t available in this build">Everything else in Wren works without it.</Notice>
       </Screen>
     );
   }
@@ -58,7 +58,7 @@ function Consent() {
             <AppText variant="bodyStrong">Before you start</AppText>
             <Bullet text="Wren is an AI language model. It can be wrong, and it is not a therapist, doctor or crisis service." />
             <Bullet text="To answer, your messages and a short summary of your last 14 days (sleep, study, mood, stress, goals, exams, steps and the feelings named in your journal, never the entries themselves) are sent to OpenRouter and the AI model provider. Raw motion data is never sent." />
-            <Bullet text={AI_VIA_PROXY ? 'Requests go through WellTrack’s server, which does not keep your messages.' : 'WellTrack doesn’t keep your conversation on any server; it stays on this phone and in your backup.'} />
+            <Bullet text={AI_VIA_PROXY ? 'Requests go through Wren’s server, which does not keep your messages.' : 'Wren doesn’t keep your conversation on any server; it stays on this phone and in your backup.'} />
             <Bullet text="Don’t share anything you wouldn’t want a third-party service to process." />
           </View>
         </Card>
@@ -220,7 +220,7 @@ function Chat() {
         ) : null}
       </ScrollView>
 
-      <View style={[styles.inputBar, { paddingBottom: keyboard ? 12 : tabBarBottom(insets.bottom) + TAB_BAR_HEIGHT + 12 }]}>
+      <View style={[styles.inputBar, { paddingBottom: keyboard ? 12 : aboveTabBar(insets.bottom) + 12 }]}>
         <TextInput
           value={draft}
           onChangeText={setDraft}

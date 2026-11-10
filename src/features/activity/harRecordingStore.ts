@@ -8,7 +8,7 @@ import * as Sharing from 'expo-sharing';
 
 import { dateKey } from '@/lib/dates';
 
-import { combineCsv, recordingToCsv, type RecordingMeta, type SampleBuffer } from './harRecordingFormat';
+import { combineCsv, csvToBuffer, recordingToCsv, type RecordingMeta, type SampleBuffer } from './harRecordingFormat';
 
 function recordingsDir(): Directory {
   const dir = new Directory(Paths.document, 'har-recordings');
@@ -40,6 +40,16 @@ export async function listRecordings(): Promise<RecordingMeta[]> {
     }
   }
   return metas.sort((a, b) => b.startedAt - a.startedAt);
+}
+
+export async function loadRecordingBuffer(id: string): Promise<SampleBuffer | null> {
+  const f = new File(recordingsDir(), `${id}.csv`);
+  return f.exists ? csvToBuffer(await f.text()) : null;
+}
+
+/** Records (or clears) the upload time in the recording's metadata file. */
+export async function setUploaded(meta: RecordingMeta, uploadedAt: number | null): Promise<void> {
+  await writeText(new File(recordingsDir(), `${meta.id}.json`), JSON.stringify({ ...meta, uploadedAt }));
 }
 
 export function deleteRecording(id: string): void {

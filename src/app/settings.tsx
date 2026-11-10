@@ -73,7 +73,7 @@ export default function SettingsScreen() {
       file.create();
       await file.write(JSON.stringify(data, null, 2));
       if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(file.uri, { mimeType: 'application/json', dialogTitle: 'Export WellTrack data' });
+        await Sharing.shareAsync(file.uri, { mimeType: 'application/json', dialogTitle: 'Export Wren data' });
       } else {
         Alert.alert('Export saved', `Sharing is not available on this device. The file was written to:\n${file.uri}`);
       }
@@ -178,6 +178,7 @@ export default function SettingsScreen() {
         </View>
         <Button label="Open demo / replay mode" icon="play-circle-outline" variant="secondary" small onPress={() => router.push('/activity?mode=replay')} style={{ marginTop: spacing.md }} />
         <Button label="Collect labelled movement data" icon="pulse-outline" variant="secondary" small onPress={() => router.push('/collect')} style={{ marginTop: spacing.sm }} />
+        <Button label={`Research sharing: ${prefs.researchRecordingsConsentAt || prefs.researchDailyConsentAt ? 'on' : 'off'}`} icon="shield-checkmark-outline" variant="secondary" small onPress={() => router.push('/research')} style={{ marginTop: spacing.sm }} />
       </Card>
 
       <SectionHeader quiet title="Sensors" actionLabel="Re-check" onAction={() => void recheckSensors()} />
@@ -221,7 +222,7 @@ export default function SettingsScreen() {
         </AppText>
       </Card>
 
-      <SectionHeader quiet title="How WellTrack estimates things" />
+      <SectionHeader quiet title="How Wren estimates things" />
       <Card>
         <View style={{ gap: 8 }}>
           <AppText variant="bodyStrong">Activity recognition</AppText>
@@ -300,7 +301,7 @@ export default function SettingsScreen() {
           Your journal lives in a database on this phone. An account is optional: if you sign in, a private backup is kept in
           your account and only you can read it. The AI coach only sends a summary when you chat with it and have agreed. There
           are no ads, analytics or tracking SDKs. Motion sensors are read only during a session you start, and only per-session
-          summaries are saved. WellTrack is a wellness tool, not a medical device.
+          summaries are saved. Wren is a wellness tool, not a medical device.
         </AppText>
         <Button label="Privacy policy" small variant="ghost" icon="document-text-outline" onPress={() => void Linking.openURL(PRIVACY_URL)} />
       </Card>
@@ -329,8 +330,9 @@ export default function SettingsScreen() {
           : null}
         <KeyValue k="Sampling" v="50 Hz requested, resampled by timestamp" />
         <KeyValue k="Window" v="2.56 s (128 samples), 50% overlap" />
-        <KeyValue k="Mode" v="Foreground only (Expo Go)" />
-        <KeyValue k="Raw sensor storage" v="None — summaries only" />
+        <KeyValue k="All-day activity" v={prefs.allDayActivity ? 'on (OS motion history)' : 'off'} />
+        <KeyValue k="Background model" v={prefs.backgroundModel ? 'on (Android service)' : 'off'} />
+        <KeyValue k="Raw sensor storage" v="Only labelled recordings you make in Collect data" />
         <KeyValue k="Tracker status" v={`${snap.status} (${snap.mode})`} />
         <KeyValue k="Active sensor subscriptions" v={String(activeSubscriptions)} mono />
         <KeyValue k="Onboarding complete" v={String(prefs.onboardingComplete)} />

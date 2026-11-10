@@ -1,7 +1,13 @@
-/** Shared domain types for WellTrack AI. */
+/** Shared domain types for Wren. */
 
+/**
+ * Activity labels. LAYING keeps its UCI HAR name (saved sessions, CSV exports and the training
+ * scripts use it) but means "sleeping / lying down". RUNNING has no UCI data: models only predict
+ * it once one is trained on collected recordings (a model's own `classes` may be any subset).
+ */
 export const HAR_CLASSES = [
   'WALKING',
+  'RUNNING',
   'WALKING_UPSTAIRS',
   'WALKING_DOWNSTAIRS',
   'SITTING',
@@ -12,21 +18,22 @@ export type ActivityClass = (typeof HAR_CLASSES)[number];
 
 export const ACTIVITY_LABELS: Record<ActivityClass, string> = {
   WALKING: 'Walking',
+  RUNNING: 'Running',
   WALKING_UPSTAIRS: 'Walking upstairs',
   WALKING_DOWNSTAIRS: 'Walking downstairs',
   SITTING: 'Sitting',
   STANDING: 'Standing',
-  LAYING: 'Lying down',
+  LAYING: 'Sleeping / lying down',
 };
 
-/** Active = locomotion classes. Sedentary = sitting + lying. Standing is tracked separately. */
-export const ACTIVE_CLASSES: readonly ActivityClass[] = ['WALKING', 'WALKING_UPSTAIRS', 'WALKING_DOWNSTAIRS'];
-export const SEDENTARY_CLASSES: readonly ActivityClass[] = ['SITTING', 'LAYING'];
+/** Active = locomotion classes. Sedentary = sitting (sleep/lying is rest, not sedentary time). Standing is tracked separately. */
+export const ACTIVE_CLASSES: readonly ActivityClass[] = ['WALKING', 'RUNNING', 'WALKING_UPSTAIRS', 'WALKING_DOWNSTAIRS'];
+export const SEDENTARY_CLASSES: readonly ActivityClass[] = ['SITTING'];
 
 export type ActivityDurations = Record<ActivityClass, number>; // seconds
 
 export function emptyDurations(): ActivityDurations {
-  return { WALKING: 0, WALKING_UPSTAIRS: 0, WALKING_DOWNSTAIRS: 0, SITTING: 0, STANDING: 0, LAYING: 0 };
+  return { WALKING: 0, RUNNING: 0, WALKING_UPSTAIRS: 0, WALKING_DOWNSTAIRS: 0, SITTING: 0, STANDING: 0, LAYING: 0 };
 }
 
 /** Where a tracking session's samples came from. Replay sessions never count toward personal stats. */
@@ -155,6 +162,14 @@ export interface Preferences {
   healthKitEnabled: boolean;
   /** Journal editor: larger body text. */
   journalLargeText: boolean;
+  /** Read the phone's all-day motion history (iOS Core Motion / Android Activity Recognition). */
+  allDayActivity: boolean;
+  /** Android: run our own activity model in the background (foreground service + notification). */
+  backgroundModel: boolean;
+  /** Research: when the user agreed to upload labelled sensor recordings (ms); null = not shared. */
+  researchRecordingsConsentAt: number | null;
+  /** Research: when the user agreed to upload daily activity summaries with their stress rating (ms). */
+  researchDailyConsentAt: number | null;
 }
 
 export const DEFAULT_PREFERENCES: Preferences = {
@@ -177,6 +192,10 @@ export const DEFAULT_PREFERENCES: Preferences = {
   journalAiConsentAt: null,
   healthKitEnabled: false,
   journalLargeText: false,
+  allDayActivity: false,
+  backgroundModel: false,
+  researchRecordingsConsentAt: null,
+  researchDailyConsentAt: null,
 };
 
 export type ExamKind = 'exam' | 'assignment' | 'presentation' | 'other';

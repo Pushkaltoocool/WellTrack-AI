@@ -734,7 +734,7 @@ export async function userRecordCount(db: Db): Promise<number> {
 }
 
 /**
- * Replaces every record on this device with the contents of a WellTrack export
+ * Replaces every record on this device with the contents of a Wren export
  * (file restore or cloud restore). Unknown columns are ignored; the whole import is one transaction.
  */
 export async function importAll(db: Db, data: WellTrackExport): Promise<number> {

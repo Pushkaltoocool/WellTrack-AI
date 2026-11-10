@@ -46,6 +46,8 @@ export interface SavedSessionSummary {
   steps: number | null;
   tooShort: boolean;
   replayCorrectWindows?: number;
+  /** Set when classification worked but writing the session to the database failed. */
+  error?: string;
 }
 
 export interface TrackerSnapshot {
@@ -536,6 +538,8 @@ export function TrackerProvider({ children }: { children: ReactNode }) {
     const activeSeconds = r.activeMs / 1000;
     rt.current = freshRuntime();
     setTicking(false);
+    // The UI tick has stopped, so push the idle state now — otherwise the screen stays on "tracking".
+    publish();
     if (!summary.tooShort && engine) {
       try {
         summary.id = await insertSession(db, {
@@ -554,19 +558,19 @@ export function TrackerProvider({ children }: { children: ReactNode }) {
         if (summary.source === 'live') await refreshRecommendations(db, prefs);
         invalidate();
       } catch (e) {
-        r.warning = `Could not save session: ${e instanceof Error ? e.message : String(e)}`;
+        summary.error = `Could not save session: ${e instanceof Error ? e.message : String(e)}`;
       }
     }
     setLastSaved(summary);
     return summary;
-  }, [db, invalidate, prefs, removeSubs]);
+  }, [db, invalidate, prefs, publish, removeSubs]);
 
   // Foreground-only tracking: pause when the app leaves the foreground.
   useEffect(() => {
     const sub = AppState.addEventListener('change', (state) => {
       if (state !== 'active' && rt.current.status === 'tracking' && rt.current.mode === 'live') {
         pause();
-        rt.current.warning = 'Tracking paused because the app left the foreground (Expo Go supports foreground tracking only).';
+        rt.current.warning = 'Live tracking paused because the app left the screen. Your all-day activity keeps being noted by your phone.';
       }
     });
     return () => sub.remove();

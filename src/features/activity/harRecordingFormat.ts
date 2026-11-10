@@ -41,6 +41,8 @@ export interface RecordingMeta {
   meanGyroRateHz: number | null;
   stoppedBy: 'timer' | 'manual' | 'background';
   trimmedEndSeconds: number;
+  /** When this recording finished uploading to the research dataset (ms); absent = not uploaded. */
+  uploadedAt?: number | null;
 }
 
 /** Resampled 50 Hz samples, column-wise. */
@@ -92,6 +94,22 @@ export function recordingToCsv(meta: RecordingMeta, buf: SampleBuffer): string {
     rows.push(`${prefix},${buf.segment[i]},${buf.t[i].toFixed(3)},${acc},${gyro}`);
   }
   return rows.join('\n') + '\n';
+}
+
+/** Parses one recording's CSV (as written by recordingToCsv) back into a sample buffer. */
+export function csvToBuffer(csv: string): SampleBuffer {
+  const buf = emptyBuffer();
+  const lines = csv.split('\n');
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line) continue;
+    const c = line.split(',');
+    // recording_id,label,placement,platform,device,segment,t,acc_x,acc_y,acc_z,gyro_x,gyro_y,gyro_z
+    buf.segment.push(Number(c[5]));
+    buf.t.push(Number(c[6]));
+    for (let k = 0; k < 6; k++) buf.ch[k].push(c[7 + k] === '' ? 0 : Number(c[7 + k]));
+  }
+  return buf;
 }
 
 /** Joins per-recording CSVs into one file with a single header. */

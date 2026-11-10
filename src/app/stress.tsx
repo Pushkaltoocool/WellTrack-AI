@@ -179,7 +179,7 @@ export default function StressScreen() {
                 'Only sleep and study hours affect this estimate. Your own stress rating, mood, academic pressure, screen time, social and physical activity do not.',
                 'The model scored 100% on its test set only because the labels follow a fixed rule — this is not evidence that it measures real stress.',
                 'Activity recognition (HAR) and this estimate are separate models trained on unrelated datasets; they are not combined.',
-                'WellTrack is not a medical device and does not diagnose any condition. Your own sense of how you feel matters more than this category.',
+                'Wren is not a medical device and does not diagnose any condition. Your own sense of how you feel matters more than this category.',
               ].map((t) => (
                 <View key={t} style={styles.pathRow}>
                   <Ionicons name="alert-circle-outline" size={16} color={colors.amber} />

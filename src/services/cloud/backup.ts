@@ -6,7 +6,8 @@
  */
 import { collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, setDoc, writeBatch } from 'firebase/firestore';
 
-import { chunkRows, parseExport, type WellTrackExport } from '@/services/database/backupFormat';
+import { withdrawAllDays, withdrawAllRecordings } from '@/features/research/researchUpload';
+import { chunkRows, EXPORT_APP_ID, parseExport, type WellTrackExport } from '@/services/database/backupFormat';
 import type { Db } from '@/services/database/db';
 import { exportAll, importAll } from '@/services/database/repositories';
 import { BACKUP_TABLES } from '@/services/database/schema';
@@ -26,7 +27,7 @@ type Row = Record<string, unknown>;
 export function cloudErrorMessage(e: unknown): string {
   const code = typeof e === 'object' && e && 'code' in e ? String((e as { code: unknown }).code) : '';
   if (code === 'permission-denied') return 'The cloud refused this backup. The server’s security rules may not be deployed yet.';
-  if (code === 'unavailable' || code === 'deadline-exceeded') return 'You appear to be offline. WellTrack will try again later.';
+  if (code === 'unavailable' || code === 'deadline-exceeded') return 'You appear to be offline. Wren will try again later.';
   if (code === 'resource-exhausted') return 'The cloud backup quota is used up for today. Your data is safe on this device.';
   if (code === 'unauthenticated') return 'Please sign in again to back up.';
   return e instanceof Error && e.message ? e.message : 'Backup failed.';
@@ -83,7 +84,7 @@ export async function downloadBackup(uid: string): Promise<WellTrackExport | nul
   if (!meta) return null;
   const snaps = await getDocs(partsCol(uid));
   const byId = new Map(snaps.docs.map((d) => [d.id, d.data()]));
-  const assembled: Record<string, unknown> = { app: 'WellTrack AI', exportedAt: meta.exportedAt, schemaVersion: meta.schemaVersion };
+  const assembled: Record<string, unknown> = { app: EXPORT_APP_ID, exportedAt: meta.exportedAt, schemaVersion: meta.schemaVersion };
   for (const id of meta.parts) {
     const part = byId.get(id);
     if (!part) throw new Error('Your cloud backup is incomplete. Try backing up again from your other device.');
@@ -105,6 +106,13 @@ export async function restoreFromCloud(db: Db, uid: string): Promise<number | nu
 
 /** Deletes every document the app stored for this user. */
 export async function deleteCloudData(uid: string): Promise<void> {
+  // Research contributions go with the account. Before the research rules are deployed nothing can
+  // have been uploaded, and reading the collections is denied — that must not block the deletion.
+  const tolerateDenied = (e: unknown) => {
+    if ((e as { code?: string } | null)?.code !== 'permission-denied') throw e;
+  };
+  await withdrawAllRecordings(uid).catch(tolerateDenied);
+  await withdrawAllDays(uid).catch(tolerateDenied);
   const parts = await getDocs(partsCol(uid));
   await Promise.all(parts.docs.map((d) => deleteDoc(d.ref)));
   await deleteDoc(userDoc(uid));

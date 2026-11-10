@@ -1,6 +1,8 @@
 rules_version = '2';
 
 // WellTrack AI: every document lives under users/{uid} and is private to that signed-in user.
+// Research contributions (harRecordings, researchDays) are also owner-only; the training scripts
+// read them with the Admin SDK, which bypasses these rules.
 service cloud.firestore {
   match /databases/{database}/documents {
     function isOwner(uid) {
@@ -12,6 +14,23 @@ service cloud.firestore {
 
       match /backup/{part} {
         allow read, write: if isOwner(uid);
+      }
+
+      // Labelled sensor recordings: metadata doc + up to 50 chunks of 50 Hz samples.
+      match /harRecordings/{recordingId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && request.resource.data.uid == uid;
+
+        match /chunks/{chunk} {
+          allow read, delete: if isOwner(uid);
+          allow create, update: if isOwner(uid) && chunk.size() == 3 && request.resource.data.count <= 15000;
+        }
+      }
+
+      // One row per day: activity summary + the user's own stress rating.
+      match /researchDays/{day} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && request.resource.data.uid == uid && day.size() == 10;
       }
     }
 

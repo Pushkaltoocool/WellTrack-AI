@@ -1,12 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, usePathname } from 'expo-router';
+import { Stack } from 'expo-router/stack';
 import type { ReactNode } from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useStyles, useTheme } from '@/theme/ThemeProvider';
 import type { Palette } from '@/theme/tokens';
 import { AppText } from './AppText';
 import { useCollapseOnScroll } from './tabBarState';
+/** Root-stack routes presented as iOS sheets; they keep the in-content close button instead of a native header. */
+const SHEET_ROUTES = new Set(['checkin', 'entry']);
+
 export function ScreenBackground() { const { colors } = useTheme(); return <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: colors.bg }]} />; }
 export interface ScreenProps {
   children: ReactNode; title?: string; subtitle?: string; back?: boolean; right?: ReactNode; scroll?: boolean;
@@ -16,7 +20,38 @@ export function Screen({ children, title, subtitle, back, right, scroll = true, 
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
   const insets = useSafeAreaInsets();
-  const onScroll = useCollapseOnScroll(usePathname().split('/')[1]);
+  const route = usePathname().split('/')[1];
+  const onScroll = useCollapseOnScroll(route);
+  // iOS pushed screens keep only the native Liquid Glass back button floating over the content. The
+  // page title scrolls away with the content instead of staying pinned under the bar.
+  const nativeHeader = Platform.OS === 'ios' && !!back && !SHEET_ROUTES.has(route ?? '');
+  if (nativeHeader) {
+    const options = {
+      headerShown: true,
+      title: '',
+      headerTransparent: true,
+      headerLargeTitleEnabled: false,
+      headerShadowVisible: false,
+      headerTintColor: colors.text,
+      headerBackButtonDisplayMode: 'minimal' as const,
+      headerRight: right ? () => right : undefined,
+      scrollEdgeEffects: { top: 'hidden' as const },
+    };
+    const padding = { paddingTop: 4, paddingBottom: footer ? 24 : insets.bottom + 48 + bottomInset, paddingHorizontal: 24 };
+    const intro = title || subtitle ? <View style={styles.header}>
+      {title ? <AppText variant="title" accessibilityRole="header">{title}</AppText> : null}
+      {subtitle ? <AppText secondary>{subtitle}</AppText> : null}
+    </View> : null;
+    return <View style={styles.root}>
+      <Stack.Screen options={options} />
+      {scroll ? <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={[styles.content, padding]} keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        refreshControl={onRefresh ? <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} colors={[colors.primary]} /> : undefined}>
+        {intro}{children}
+      </ScrollView> : <View style={[styles.content, padding, { flex: 1, paddingTop: insets.top + 56, paddingBottom: 24 }]}>{intro}{children}</View>}
+      {footer ? <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}><View style={styles.footerContent}>{footer}</View></View> : null}
+    </View>;
+  }
   const header = title || back ? <View style={styles.header}>
     {back ? <View style={styles.topRow}><Pressable accessibilityRole="button" accessibilityLabel="Go back"
       onPress={() => router.canGoBack() ? router.back() : router.replace('/home')} style={styles.back}>

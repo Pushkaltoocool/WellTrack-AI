@@ -45,6 +45,9 @@ example
 # WellTrack AI
 logs/
 ml/har/cache/
+ml/har/build/
+# consented user recordings / research rows downloaded by ml/har/fetch_firestore.py
+data/collected/
 __pycache__/
 *.pyc
 
@@ -59,3 +62,7 @@ service-account*.json
 .env.*
 !.env.example
 functions/lib/
+
+# Native Firebase config (the app uses the Firebase JS SDK; kept only for reference)
+GoogleService-Info.plist
+google-services.json

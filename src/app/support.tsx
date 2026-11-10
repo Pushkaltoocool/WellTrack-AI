@@ -42,7 +42,7 @@ export default function Support() {
   return (
     <Screen back title="Getting support" subtitle="You don't have to manage stress alone">
       <Notice tone="danger" icon="call-outline" title="If you are in immediate danger">
-        Contact your local emergency number or a crisis line in your country right away. WellTrack cannot monitor you or contact
+        Contact your local emergency number or a crisis line in your country right away. Wren cannot monitor you or contact
         anyone on your behalf.
       </Notice>
       <Button
@@ -80,7 +80,7 @@ export default function Support() {
         </View>
       </Card>
       <AppText variant="caption" muted style={{ marginTop: spacing.lg }}>
-        WellTrack AI is a wellness app, not a medical device, and does not provide diagnosis or treatment.
+        Wren is a wellness app, not a medical device, and does not provide diagnosis or treatment.
       </AppText>
     </Screen>
   );

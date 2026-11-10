@@ -117,7 +117,7 @@ export function RemindersCard() {
   const enable = async (patch: Partial<Preferences>) => {
     const turningOn = Object.values(patch).some((v) => v === true);
     if (turningOn && !(await notificationPermission(true))) {
-      Alert.alert('Notifications are off', 'Allow notifications for WellTrack in your phone’s Settings to get reminders.');
+      Alert.alert('Notifications are off', 'Allow notifications for Wren in your phone’s Settings to get reminders.');
       return;
     }
     await updatePrefs(patch);
@@ -160,7 +160,7 @@ export function SecurityCard() {
     <Card>
       <ToggleRow
         title="App lock"
-        body={Platform.OS === 'ios' ? 'Require Face ID, Touch ID or your passcode to open WellTrack.' : 'Require your fingerprint, face or screen lock to open WellTrack.'}
+        body={Platform.OS === 'ios' ? 'Require Face ID, Touch ID or your passcode to open Wren.' : 'Require your fingerprint, face or screen lock to open Wren.'}
         value={prefs.appLock}
         onChange={(v) => void toggle(v)}
         label="App lock"
@@ -246,7 +246,7 @@ export function useRestoreFromFile() {
       data = parseExport(JSON.parse(await picked.result.text()));
     } catch (e) {
       console.warn('[restore]', e);
-      Alert.alert('Can’t restore this file', e instanceof BackupFormatError ? e.message : 'This file isn’t a readable WellTrack export.');
+      Alert.alert('Can’t restore this file', e instanceof BackupFormatError ? e.message : 'This file isn’t a readable Wren export.');
       return;
     }
     const s = exportSummary(data);

@@ -1,5 +1,5 @@
 /**
- * Dawn (light) and Dusk (dark) — WellTrack's own identity: warm paper surfaces, ink-navy text and
+ * Dawn (light) and Dusk (dark) — Wren's own identity: warm paper surfaces, ink-navy text and
  * actions, Wren's mint and a sunrise peach, Fraunces for display type. Dusk is the same identity at
  * night: deep navy paper, cream ink. Read theme colours through `useTheme()` / `useStyles()` from
  * `ThemeProvider.tsx`; only scheme-independent tokens are exported statically from here.
@@ -68,7 +68,7 @@ export function skyFor(hour: number): readonly [string, string] {
 /** Mood 1–5 — the same colours as Wren's mood owls (slate, blue, sky, mint, peach). Readable on both themes. */
 export const moodColors = ['#6B7590', '#7F9BE0', '#A9C1E8', '#6FD3BE', '#EDBB8A'] as const;
 export const activityColors: Record<string, string> = {
-  WALKING: '#2C8F7B', WALKING_UPSTAIRS: '#2F6F8F', WALKING_DOWNSTAIRS: '#8DB3D9',
+  WALKING: '#2C8F7B', RUNNING: '#E8956B', WALKING_UPSTAIRS: '#2F6F8F', WALKING_DOWNSTAIRS: '#8DB3D9',
   SITTING: '#7466C4', STANDING: '#B8732A', LAYING: '#D0564C',
 };
 export const spacing = { xxs: 2, xs: 4, sm: 8, md: 12, lg: 16, xl: 20, xxl: 24, xxxl: 32 } as const;

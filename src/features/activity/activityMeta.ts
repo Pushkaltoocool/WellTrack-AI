@@ -5,11 +5,12 @@ import { ACTIVITY_LABELS, HAR_CLASSES, type ActivityClass } from '@/types/domain
 
 export const ACTIVITY_ICONS: Record<ActivityClass, keyof typeof Ionicons.glyphMap> = {
   WALKING: 'walk',
+  RUNNING: 'speedometer-outline',
   WALKING_UPSTAIRS: 'trending-up',
   WALKING_DOWNSTAIRS: 'trending-down',
   SITTING: 'laptop-outline',
   STANDING: 'accessibility-outline',
-  LAYING: 'bed-outline',
+  LAYING: 'moon-outline',
 };
 
 export function activityLabel(c: ActivityClass): string {

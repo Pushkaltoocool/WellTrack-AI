@@ -131,7 +131,7 @@ function capital(s: string): string {
   return s ? s[0].toUpperCase() + s.slice(1) : s;
 }
 
-const SYSTEM = 'You are Wren, a gentle owl in WellTrack, a wellbeing app for students. Write a short weekly letter (70 to 120 words, 2 or 3 short paragraphs, no greeting line, no sign-off) to the student, using ONLY the facts provided. Do not invent events, numbers or feelings. No diagnosis, no medical advice, no lists. Warm, specific and plain. End with one small, kind suggestion for next week.';
+const SYSTEM = 'You are Wren, a gentle owl and the namesake of the Wren app, a wellbeing app for students. Write a short weekly letter (70 to 120 words, 2 or 3 short paragraphs, no greeting line, no sign-off) to the student, using ONLY the facts provided. Do not invent events, numbers or feelings. No diagnosis, no medical advice, no lists. Warm, specific and plain. End with one small, kind suggestion for next week.';
 
 /** Ask the AI to rewrite the letter from the same facts. Falls back to the on-device letter on any failure. */
 export async function aiWeekLetter(letter: WeekLetter, opts: { idToken?: string | null }): Promise<{ letter: WeekLetter; error?: string }> {

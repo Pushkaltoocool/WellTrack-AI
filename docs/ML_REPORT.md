@@ -200,3 +200,65 @@ How the app presents it:
 - The provenance of the population is unverified.
 
 **Recommended next step:** collect consented in-app check-ins and use self-reported stress as the label to train a genuinely predictive model.
+
+---
+
+## 3. Improving the activity model with users' recordings
+
+The app's label set has seven activities: walking, **running**, upstairs, downstairs, sitting, standing and lying down. The app shows lying down as "Sleeping / lying down", and users record it in bed. UCI has no running data, so the shipped model only predicts running once enough people have recorded it. The steps below are the whole loop. Run every command from the repository root.
+
+**1. Collect.** Users who opt in record labelled activities in the app. Finished recordings upload to Firestore under `users/{uid}/harRecordings` (int16 chunks), and daily summaries go to `users/{uid}/researchDays`. Nothing is needed on your side.
+
+**2. Fetch.**
+
+```bash
+python -m pip install firebase-admin          # once
+python -I ml/har/fetch_firestore.py --key welltrackai-128b4-firebase-adminsdk-fbsvc-6c75efe737.json
+```
+
+- This writes one CSV per finished recording to `data/collected/firestore/recordings/`, plus `subjects.csv` (recording → subject) and `research_days.csv` (one flat row per user-day).
+- Users are identified only by a short salted hash of their uid (for example `s1a2b3c4d5e`), never by the uid itself.
+- Runs are incremental: recordings already on disk are skipped. `--since YYYY-MM-DD` limits a run to recent uploads.
+- A run **without** `--since` also deletes local copies of recordings that users withdrew. Run it that way regularly so withdrawals are respected.
+- `data/collected/` and the service-account key are git-ignored. Never commit either.
+- Optionally, create the collection-group index on `harRecordings.complete` from the link the script prints. Without it the script still works and filters on your side.
+
+**3. Check (optional).** `python -I ml/har/collected.py data/collected` shows how the **currently shipped** model scores on real phones, per activity and placement.
+
+**4. Train.**
+
+```bash
+python -I ml/har/train_har.py                     # UCI + everything in data/collected/
+python -I ml/har/train_har.py --collected-only    # only app recordings (UCI is waist-mounted; users mostly use pockets)
+```
+
+- The script prints a table of subjects and windows per class, for UCI and for collected data.
+- A class is exported only with **at least 3 different people and 200 windows** (2.56 s each, about 4.3 min). Change this with `--min-subjects` and `--min-windows`. Excluded classes are listed with the reason, together with what the model predicts for their windows instead (e.g. running → walking).
+- About 30 % of the collected users are held out for testing (`--collected-test-frac`). The metrics are split by source (UCI vs. collected) and by placement. **The collected/placement numbers are the ones that predict real-phone accuracy.**
+- Useful options:
+  - `--lr-only` skips the slow comparison models.
+  - `--balanced` evens out rare classes.
+  - `--collected-weight 3` makes app windows count more than UCI windows.
+  - `--refit-all` retrains on the held-out users too, after evaluation.
+  - `--model-version v3` sets the version suffix of the model IDs; use a new suffix for every release.
+- With no collected data, the script reproduces the UCI-only six-class model (§1).
+
+The outputs go to `ml/har/build/` (git-ignored):
+
+| File | Purpose |
+|---|---|
+| `har_model.json`, `har_model_acc.json` | Models with acc + gyro and accelerometer only |
+| `har_fixtures.json` | Parity fixtures |
+| `metrics.json`, `class_counts.csv` | Metrics and per-class data counts |
+| `cm_*.png` | Confusion matrices |
+
+**5. Ship.**
+
+1. Copy `ml/har/build/har_model.json` and `har_model_acc.json` to `models/`.
+2. Copy `har_fixtures.json` to `tests/fixtures/`.
+3. Optionally, copy `metrics.json` and the PNGs to `ml/har/results/`.
+4. Update `tests/harParity.test.ts`: the expected model ID, and the expected number of fixture classes if it changed.
+5. Run the checks: `npx jest tests/harParity`, `npx tsc --noEmit` and `npx expo lint`.
+6. Rebuild the app.
+
+The app reads the class list from each model file, so a model with fewer or more classes needs no code change. The features (`features.py` ↔ `harFeatures.ts`) must stay unchanged.

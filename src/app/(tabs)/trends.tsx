@@ -13,6 +13,7 @@ import { Chips, Eyebrow, Notice, Segmented } from '@/components/ui/misc';
 import { Owl } from '@/components/ui/Owl';
 import { Screen } from '@/components/ui/Screen';
 import { SourceTag, type DataSource } from '@/components/ui/SourceTag';
+import { Glass } from '@/components/ui/Glass';
 import { TAB_BAR_COLLAPSED, TAB_BAR_HEIGHT, tabBarBottom, useTabBarCollapsed } from '@/components/ui/tabBarState';
 import { bucketize, mean, moodHeadline, periodFor, type Bucket, type Period, type PeriodKind } from '@/features/analytics/periods';
 import { useHealthData, type DailyHealth } from '@/features/health';
@@ -21,7 +22,10 @@ import { topEmotions, topWords, triggerSummary } from '@/features/journal/journa
 import { emotionColor, loadJournal, toInsightEntries } from '@/features/journal/journalService';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { todayKey } from '@/lib/dates';
+import { buildDayFeatures } from '@/features/research/dailyFeatures';
+import { MIN_DAYS, stressVsActivity } from '@/features/research/stressSignals';
 import { useData, useDbQuery } from '@/services/database/DataProvider';
+import { ACTIVE_CLASSES } from '@/types/domain';
 import { listCheckIns, listDailySteps, listPractices, listSessions } from '@/services/database/repositories';
 import { useStyles, useTheme, type Theme } from '@/theme/ThemeProvider';
 import { moodColors, radii, type Palette } from '@/theme/tokens';
@@ -137,6 +141,7 @@ export default function TrendsScreen() {
       <PracticeCard title="Breathing" what="did breathing exercises" p={p} rows={within(data?.practices ?? [], p).filter((r) => r.kind === 'breathing')} action={() => router.push('/breathing')} />
       <PracticeCard title="Focus" what="completed focus blocks" p={p} rows={within(data?.practices ?? [], p).filter((r) => r.kind === 'focus')} action={() => router.push('/focus')} />
       <MovementCard p={p} sessions={within(data?.sessions ?? [], p)} />
+      <StressMovementCard />
     </Screen>
     <PeriodNav period={p} onPrev={() => setOffset((o) => o - 1)} onNext={() => setOffset((o) => Math.min(0, o + 1))} canNext={offset < 0} />
   </View>;
@@ -278,10 +283,28 @@ function PracticeCard({ title, what, p, rows, action }: { title: string; what: s
 
 function MovementCard({ p, sessions }: { p: Period; sessions: { dateKey: string; durations: Record<string, number> }[] }) {
   const { colors } = useTheme();
-  const active = bucketize(sessions, p.buckets, (rs) => sum(rs.map((r) => ((r.durations.WALKING ?? 0) + (r.durations.WALKING_UPSTAIRS ?? 0) + (r.durations.WALKING_DOWNSTAIRS ?? 0)) / 60)));
+  const active = bucketize(sessions, p.buckets, (rs) => sum(rs.map((r) => ACTIVE_CLASSES.reduce((a, k) => a + (r.durations[k] ?? 0), 0) / 60)));
   return <TrendCard title="Movement" subtitle="Active minutes recognised while tracking">
     {active.some((v) => v) ? <>{bars(p, active, colors.teal, (v) => `${Math.round(v)}`)}<SourceTag source="ml" label="ML-classified sensor data" /></>
       : <View style={{ gap: 12 }}><NoData body="Track a walk and your active minutes will appear here." /><Button label="Track movement" small variant="secondary" onPress={() => router.push('/activity')} style={{ alignSelf: 'center' }} /></View>}
+  </TrendCard>;
+}
+
+/** Stress (check-ins) vs measured movement over the last 90 days — descriptive, not a prediction. */
+function StressMovementCard() {
+  const { colors } = useTheme();
+  const { data } = useDbQuery((d) => buildDayFeatures(d, 90), []);
+  const signal = stressVsActivity(data ?? []);
+  return <TrendCard title="Stress & movement" subtitle="Your check-in stress compared with how much you moved that day">
+    {signal.sentence ? <View style={{ gap: 10 }}>
+      <AppText variant="bodyStrong" style={{ fontSize: 17 }}>{signal.sentence}</AppText>
+      <AppText variant="caption" muted>{`Based on ${signal.days} days with both a check-in and measured movement. A pattern in your own days, not proof that one causes the other.`}</AppText>
+      <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}><SourceTag source="self-reported" label="Your stress ratings" /><SourceTag source="measured" label="Measured movement" /></View>
+    </View> : <View style={{ gap: 12 }}>
+      <NoData body={`Check in on ${MIN_DAYS} days with all-day activity on, and Wren will show how your stress and movement line up. ${signal.days ? `${signal.days} so far.` : ''}`} />
+      <Button label="Turn on all-day activity" small variant="secondary" onPress={() => router.push('/activity')} style={{ alignSelf: 'center' }} />
+    </View>}
+    <View style={{ marginTop: 12, height: 1, backgroundColor: colors.border }} />
   </TrendCard>;
 }
 
@@ -293,10 +316,12 @@ function PeriodNav({ period, onPrev, onNext, canNext }: { period: Period; onPrev
   const collapsed = useTabBarCollapsed('trends');
   const reduceMotion = useReducedMotion();
   const base = tabBarBottom(insets.bottom);
+  // Above the bar; tucks in beside the collapsed pill while scrolling.
   const style = collapsed
     ? { left: 16 + TAB_BAR_COLLAPSED + 12, bottom: base + (TAB_BAR_HEIGHT - TAB_BAR_COLLAPSED) / 2, height: TAB_BAR_COLLAPSED }
     : { left: 16, bottom: base + TAB_BAR_HEIGHT + 10, height: 60 };
-  return <Animated.View layout={reduceMotion ? undefined : LinearTransition.springify().damping(20).stiffness(220)} style={[styles.periodNav, style]}>
+  return <Animated.View layout={reduceMotion ? undefined : LinearTransition.duration(180)} style={[styles.periodNavPos, style]}>
+    <Glass style={styles.periodNav} fallbackStyle={styles.periodNavSolid} interactive>
     <Pressable onPress={onPrev} accessibilityRole="button" accessibilityLabel="Previous period" hitSlop={8} style={styles.navBtn}>
       <Ionicons name="chevron-back" size={24} color={colors.text} />
     </Pressable>
@@ -307,6 +332,7 @@ function PeriodNav({ period, onPrev, onNext, canNext }: { period: Period; onPrev
     <Pressable onPress={onNext} disabled={!canNext} accessibilityRole="button" accessibilityLabel="Next period" hitSlop={8} style={[styles.navBtn, !canNext && { opacity: 0.3 }]}>
       <Ionicons name="chevron-forward" size={24} color={colors.text} />
     </Pressable>
+    </Glass>
   </Animated.View>;
 }
 
@@ -317,6 +343,8 @@ const makeStyles = (c: Palette, t: Theme) => StyleSheet.create({
   bleed: { marginHorizontal: -24 },
   card: { backgroundColor: c.surface, borderRadius: radii.lg, padding: 22, marginBottom: 16, ...t.shadow.card, borderWidth: t.dark ? StyleSheet.hairlineWidth : 0, borderColor: c.border },
   linkRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 6, minHeight: 48, marginTop: 14, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.borderStrong, paddingTop: 10 },
-  periodNav: { position: 'absolute', right: 16, flexDirection: 'row', alignItems: 'center', borderRadius: 999, backgroundColor: t.dark ? 'rgba(27,32,48,0.97)' : 'rgba(255,255,255,0.97)', borderWidth: StyleSheet.hairlineWidth, borderColor: c.borderStrong, paddingHorizontal: 8, maxWidth: 520, ...t.shadow.float },
+  periodNavPos: { position: 'absolute', right: 16, maxWidth: 520 },
+  periodNav: { flex: 1, flexDirection: 'row', alignItems: 'center', borderRadius: 999, paddingHorizontal: 8 },
+  periodNavSolid: { backgroundColor: t.dark ? 'rgba(27,32,48,0.97)' : 'rgba(255,255,255,0.97)', borderWidth: StyleSheet.hairlineWidth, borderColor: c.borderStrong, ...t.shadow.float },
   navBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
 });

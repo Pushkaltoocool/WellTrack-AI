@@ -7,7 +7,8 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/ui/AppText';
-import { TAB_BAR_HEIGHT, tabBarBottom, useKeyboardVisible } from '@/components/ui/tabBarState';
+import { Glass } from '@/components/ui/Glass';
+import { aboveTabBar, useKeyboardVisible } from '@/components/ui/tabBarState';
 import { promptForDay } from '@/features/journal/prompts';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { todayKey } from '@/lib/dates';
@@ -26,7 +27,7 @@ export function ComposeFab() {
   const keyboard = useKeyboardVisible();
   const [open, setOpen] = useState(false);
   if (keyboard) return null;
-  const bottom = tabBarBottom(insets.bottom) + TAB_BAR_HEIGHT + 14;
+  const bottom = aboveTabBar(insets.bottom) + 14;
   const prompt = promptForDay(todayKey());
   const items: Item[] = [
     { label: 'Blank page', body: 'Write whatever is on your mind', icon: 'create-outline', tint: colors.ink, href: '/entry' },
@@ -44,9 +45,11 @@ export function ComposeFab() {
   };
   return <>
     <Pressable onPress={() => toggle(true)} accessibilityRole="button" accessibilityLabel="Write or check in"
-      style={({ pressed }) => [styles.fab, { bottom }, pressed && { transform: [{ scale: 0.96 }] }]}>
-      <Ionicons name="create-outline" size={20} color={colors.onInk} />
-      <AppText variant="bodyStrong" color={colors.onInk}>Write</AppText>
+      style={({ pressed }) => [styles.fabPos, { bottom }, pressed && { transform: [{ scale: 0.96 }] }]}>
+      <Glass style={styles.fab} fallbackStyle={styles.fabSolid} tintColor={colors.ink} interactive>
+        <Ionicons name="create-outline" size={20} color={colors.onInk} />
+        <AppText variant="bodyStrong" color={colors.onInk}>Write</AppText>
+      </Glass>
     </Pressable>
     <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)} statusBarTranslucent navigationBarTranslucent>
       <Pressable style={styles.backdrop} onPress={() => setOpen(false)} accessibilityLabel="Close menu" accessibilityRole="button" />
@@ -70,7 +73,9 @@ export function ComposeFab() {
 }
 
 const makeStyles = (c: Palette, t: Theme) => StyleSheet.create({
-  fab: { position: 'absolute', right: 20, flexDirection: 'row', alignItems: 'center', gap: 8, height: 54, paddingHorizontal: 22, borderRadius: 18, backgroundColor: c.ink, ...t.shadow.float },
+  fabPos: { position: 'absolute', right: 20 },
+  fab: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 54, paddingHorizontal: 22, borderRadius: 27 },
+  fabSolid: { borderRadius: 18, backgroundColor: c.ink, ...t.shadow.float },
   backdrop: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: t.dark ? c.overlay : 'rgba(31,42,68,0.28)' },
   menu: { position: 'absolute', right: 16, left: 16, maxWidth: 420, alignSelf: 'flex-end', borderRadius: radii.lg, backgroundColor: c.surface, paddingTop: 6, overflow: 'hidden', ...t.shadow.float },
   row: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 18, minHeight: 68 },

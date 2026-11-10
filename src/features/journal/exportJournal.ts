@@ -25,7 +25,7 @@ const oldestFirst = <E extends ExportableEntry>(entries: E[]) => [...entries].so
 
 /** Markdown keeps the journal's own formatting markers, so it reads well anywhere. */
 export function journalToMarkdown(entries: ExportableEntry[], exportedOn: string): string {
-  const out = [`# My WellTrack journal`, '', `Exported ${longDate(exportedOn)} · ${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`, ''];
+  const out = [`# My Wren journal`, '', `Exported ${longDate(exportedOn)} · ${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`, ''];
   for (const e of oldestFirst(entries)) {
     out.push('---', '', `## ${longDate(e.dateKey)}`, '');
     if (e.prompt) out.push(`*${e.prompt}*`, '');
@@ -74,7 +74,7 @@ h2{font-weight:400;font-size:15pt;margin:0 0 8px;color:#2C8F7B}.prompt{font-styl
 h3.t{font-size:18pt;font-weight:400;margin:8px 0}h4{font-size:15pt;font-weight:400;margin:8px 0}h5{font-size:12pt;margin:8px 0}
 blockquote{border-left:3px solid #E8956B;margin:8px 0;padding-left:12px;font-style:italic;color:#555C6B}p{margin:0 0 6px}.gap{height:6px}
 .meta{font-family:Helvetica,Arial,sans-serif;font-size:9.5pt;color:#6B7080;margin-top:10px}
-</style></head><body><h1>My WellTrack journal</h1><p class="sub">Exported ${escapeHtml(longDate(exportedOn))} · ${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}</p>
+</style></head><body><h1>My Wren journal</h1><p class="sub">Exported ${escapeHtml(longDate(exportedOn))} · ${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}</p>
 ${items}</body></html>`;
 }
 

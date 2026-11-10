@@ -58,7 +58,7 @@ export function planReminders(
     out.push({
       id: 'checkin',
       title: 'How was today?',
-      body: 'A one-minute check-in helps WellTrack spot what makes your days better.',
+      body: 'A one-minute check-in helps Wren spot what makes your days better.',
       url: '/checkin',
       category: CHECKIN_CATEGORY,
       trigger: { kind: 'daily', ...parseTime(prefs.checkInReminderTime) },

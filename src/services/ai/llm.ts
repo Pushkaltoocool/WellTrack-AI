@@ -66,7 +66,7 @@ async function requestOnce(messages: ChatMessage[], opts: ChatOpts): Promise<{ c
             'Content-Type': 'application/json',
             Authorization: `Bearer ${DEV_KEY}`,
             'HTTP-Referer': 'https://welltrackai-128b4.web.app',
-            'X-Title': 'WellTrack AI',
+            'X-Title': 'Wren',
           },
       body: JSON.stringify(body),
     });

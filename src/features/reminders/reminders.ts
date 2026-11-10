@@ -1,5 +1,5 @@
 /**
- * Local notifications (work in Expo Go; no push server). WellTrack owns every scheduled
+ * Local notifications (work in Expo Go; no push server). Wren owns every scheduled
  * notification, so each sync cancels and re-creates the full set.
  */
 import * as Notifications from 'expo-notifications';

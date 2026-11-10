@@ -3,13 +3,14 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
+import { AllDayCard } from '@/components/activity/AllDayCard';
 import { BreakdownBar, LiveSignalChart } from '@/components/charts/Charts';
 import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { EmptyState, KeyValue, Notice, Pill, ProgressBar, SectionHeader, Segmented, StatusDot } from '@/components/ui/misc';
 import { Screen } from '@/components/ui/Screen';
-import { Owl } from '@/components/ui/Owl';
+import { Companion } from '@/components/ui/Companions';
 import { SourceTag } from '@/components/ui/SourceTag';
 import { ACTIVITY_ICONS, ACTIVITY_LIST, activityColor, activityLabel } from '@/features/activity/activityMeta';
 import { REPLAY_PROGRAMS } from '@/features/activity/replayData';
@@ -20,7 +21,7 @@ import { deleteSession, listSessions } from '@/services/database/repositories';
 import { HAR_MODEL, harModelFor } from '@/services/ml/harModel';
 import { useStyles, useTheme } from '@/theme/ThemeProvider';
 import { radii, spacing, type Palette } from '@/theme/tokens';
-import { HAR_CLASSES, type ActivitySession } from '@/types/domain';
+import { ACTIVE_CLASSES, HAR_CLASSES, SEDENTARY_CLASSES, type ActivitySession } from '@/types/domain';
 
 type Mode = 'live' | 'replay';
 
@@ -68,6 +69,7 @@ export default function ActivityScreen() {
     try {
       const res = await stop();
       if (res?.tooShort) setMessage('Session was too short to classify (needs at least 2.56 s of data), so it was not saved.');
+      else if (res?.error) setMessage(res.error);
       sessions.reload();
     } finally {
       setBusy(false);
@@ -88,35 +90,30 @@ export default function ActivityScreen() {
     ]);
 
   return (
-    <Screen back title="Today’s movement">
-      <Segmented<Mode>
-        options={[
-          { value: 'live', label: 'Live sensors' },
-          { value: 'replay', label: 'Recorded replay' },
-        ]}
-        value={effectiveMode}
-        onChange={(v) => {
-          if (!idle) {
-            setMessage('Stop the current session before switching mode.');
-            return;
-          }
-          setMode(v);
-          setMessage(null);
-        }}
-      />
+    <Screen back title="Movement">
+      <AllDayCard />
+
+      <View style={styles.liveHead}>
+        <AppText variant="title" accessibilityRole="header">{effectiveMode === 'replay' ? 'Demo replay' : 'Track right now'}</AppText>
+        <AppText variant="caption" muted>{effectiveMode === 'replay' ? 'A recorded sample from the training data' : 'Wren’s own model, second by second, while the app is open'}</AppText>
+      </View>
 
       <View style={styles.movementStage}>
-        <View style={styles.owlRing}><Owl size={184} mood={current?.label.startsWith('WALKING') ? 4 : 3} pose={idle || snap.status === 'paused' ? 'sleep' : current?.label.startsWith('WALKING') ? 'walk' : 'idle'} /></View>
+        <View style={styles.ground} />
+        <Companion id="pika" size={176} pose={idle || snap.status === 'paused' ? 'sleep' : current && ACTIVE_CLASSES.includes(current.label) ? 'cheer' : 'idle'} />
         <View style={{ alignItems: 'center', gap: 6 }} accessibilityLiveRegion="polite">
           <AppText variant="caption" muted>{effectiveMode === 'replay' ? 'Demo replay · excluded from your day' : snap.status === 'paused' ? 'Paused' : 'Right now'}</AppText>
           <AppText variant="display" align="center" testID="current-activity">{effectiveMode === 'live' && availability.checked && !availability.accelerometer ? 'Sensors unavailable' : current ? activityLabel(current.label) : idle ? 'Ready when you are' : 'Getting to know your movement…'}</AppText>
         </View>
       </View>
-      <View style={{ flexDirection: 'row', gap: 10 }}>
-        <Card style={{ flex: 1 }}><AppText variant="metric">{formatMinutes(snap.durations.WALKING + snap.durations.WALKING_UPSTAIRS + snap.durations.WALKING_DOWNSTAIRS)}</AppText><AppText variant="caption" secondary>active this session</AppText></Card>
-        <Card style={{ flex: 1 }}><AppText variant="metric">{formatMinutes(snap.durations.SITTING + snap.durations.LAYING)}</AppText><AppText variant="caption" secondary>sedentary this session</AppText></Card>
-      </View>
-      <AppText variant="caption" secondary align="center" style={{ marginVertical: 18 }}>{effectiveMode === 'replay' ? 'A recorded sample, played back so you can see how recognition works. None of it is added to your day.' : availability.checked && !availability.accelerometer ? 'This phone or emulator isn’t sharing motion data. Your check-ins and suggestions still work as usual.' : 'Recognises walking, stairs, sitting, standing and lying down. Runs only while WellTrack is open. Place your phone sideways at your waist for best results.'}</AppText>
+      {!idle ? (
+        <View style={styles.figures}>
+          <View style={styles.figure}><AppText variant="metric">{formatMinutes(ACTIVE_CLASSES.reduce((a, k) => a + snap.durations[k], 0))}</AppText><AppText variant="caption" secondary>on the move</AppText></View>
+          <View style={styles.figureRule} />
+          <View style={styles.figure}><AppText variant="metric">{formatMinutes(SEDENTARY_CLASSES.reduce((a, k) => a + snap.durations[k], 0))}</AppText><AppText variant="caption" secondary>sitting</AppText></View>
+        </View>
+      ) : null}
+      <AppText variant="caption" secondary align="center" style={{ marginVertical: 18 }}>{effectiveMode === 'replay' ? 'A recorded sample, played back so you can see how recognition works. None of it is added to your day.' : availability.checked && !availability.accelerometer ? 'This phone or emulator isn’t sharing motion data. Your check-ins and suggestions still work as usual.' : `Recognises ${model.classes.map((k) => activityLabel(k as (typeof HAR_CLASSES)[number]).toLowerCase()).join(', ')}. Runs while Wren is open.${model.classes.includes('RUNNING') ? '' : ' Running joins once enough people have recorded it in Collect data.'}`}</AppText>
       <Card padded={false} style={{ backgroundColor: 'transparent' }}>
         {effectiveMode === 'live' && availability.checked && !availability.accelerometer ? <Button label="Try a demo replay" onPress={() => setMode('replay')} style={{ marginBottom: 10 }} /> : null}
         {/* Controls */}
@@ -206,6 +203,21 @@ export default function ActivityScreen() {
           ) : null}
         </Card>
       ) : null}
+
+      {idle ? (
+        <Pressable onPress={() => { setMode(effectiveMode === 'live' ? 'replay' : 'live'); setMessage(null); }} accessibilityRole="button" hitSlop={8} style={styles.modeLink}>
+          <AppText variant="caption" color={colors.textSecondary}>{effectiveMode === 'live' ? 'No sensors handy? Watch a demo replay' : 'Back to live tracking'}</AppText>
+        </Pressable>
+      ) : null}
+
+      <Pressable onPress={() => router.push('/collect')} accessibilityRole="button" style={({ pressed }) => [styles.teach, pressed && { opacity: 0.85 }]}>
+        <Companion id="pika" size={48} pose="cheer" />
+        <View style={{ flex: 1 }}>
+          <AppText variant="bodyStrong">Teach me how you move</AppText>
+          <AppText variant="caption" muted>Record a walk, a run or a few flights of stairs</AppText>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      </Pressable>
 
       {/* Replay chooser */}
       {effectiveMode === 'replay' && idle ? (
@@ -313,7 +325,6 @@ export default function ActivityScreen() {
         </View>
       </Card>
 
-      <Button label="Collect labelled movement data" icon="pulse-outline" variant="secondary" small onPress={() => router.push('/collect')} style={{ marginTop: spacing.lg }} />
 
       {/* Sensor health */}
       <SectionHeader title="Sensor health" actionLabel="Re-check" onAction={() => void recheckSensors()} />
@@ -452,8 +463,14 @@ function SensorRow({ name, ok, checked, rate }: { name: string; ok: boolean; che
 }
 
 const makeStyles = (c: Palette) => StyleSheet.create({
-  movementStage: { alignItems: 'center', gap: 22, paddingVertical: 32 },
-  owlRing: { width: 236, height: 236, borderRadius: 118, borderWidth: 1, borderColor: c.border, justifyContent: 'center', alignItems: 'center' },
+  liveHead: { marginTop: 34, gap: 2 },
+  movementStage: { alignItems: 'center', gap: 18, paddingTop: 22, paddingBottom: 18 },
+  ground: { position: 'absolute', top: 182, width: 160, height: 26, borderRadius: 80, backgroundColor: 'rgba(185,128,63,0.14)' },
+  figures: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 24, marginBottom: 6 },
+  figure: { alignItems: 'center', gap: 2, minWidth: 110 },
+  figureRule: { width: StyleSheet.hairlineWidth, height: 40, backgroundColor: c.borderStrong },
+  modeLink: { alignSelf: 'center', minHeight: 44, justifyContent: 'center', marginTop: 6 },
+  teach: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 22, paddingVertical: 12, paddingHorizontal: 14, borderRadius: radii.lg, backgroundColor: c.surface },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: spacing.sm },
   predHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   statusBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: radii.pill },
